@@ -1,0 +1,16 @@
+language: 
+      - python
+
+service:
+      - docker
+
+before_install:
+      - docker build -t my-apache2 src/.
+      - docker run -dit --name hello-world -p 80:80 my-apache2
+
+install:
+      - pip3 install -r requirements.txt
+
+script:
+      - pytest testing/
+
