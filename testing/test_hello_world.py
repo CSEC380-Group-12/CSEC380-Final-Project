@@ -10,7 +10,7 @@ from lxml import html
 
 def test_hello_world():
     body = html.parse('http://localhost').xpath('//body')[0].text_content()
-    assert 'Hello World!' == body
+    assert 'Hello World!' in body
 
 
 if __name__ == '__main__':
