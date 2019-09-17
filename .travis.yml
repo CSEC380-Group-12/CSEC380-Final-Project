@@ -3,7 +3,12 @@ language: python
 python:
   - "3.6"
 
-
+# Building Specific Branches
+branches:
+  only:
+  - master
+  - travis
+  
 service:
       - docker
 
