@@ -26,7 +26,11 @@ We require each merge request to be reviewed and approved by at least one develo
 We used containers for privilege separation of different daemons and services. Idealy, we would use TLS, firewalls, mandatory access control, and OpenBSD.
 
 ## What testing framework did you choose and why?
-We chose to use pytest becuase it was recommended in the project document, some team members were already familiar with it, and it was simple to set up and use.
+For testing our project, we chose [pytest testing framework](https://pytest.org/en/latest/) because:
+- pytest makes it easy to write tests and it's scalable 
+- it's easy to integrate with [TravicCI](https://travis-ci.com)
+- extensive documentation
+- Detailed info on failing assert statements
 
 vim:syn=markdown
 
