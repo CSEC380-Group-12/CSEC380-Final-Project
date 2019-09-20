@@ -23,10 +23,10 @@ We require each merge request to be reviewed and approved by at least one develo
 
 # Activity 2
 ## What Web Application security mechanisms are involved in your topology? What security mechanisms would ideally be involved?
-**TODO**
+We used containers for privilege separation of different daemons and services. Idealy, we would use TLS, firewalls, mandatory access control, and OpenBSD.
 
 ## What testing framework did you choose and why?
-**TODO**
+We chose to use pytest becuase it was recommended in the project document, some team members were already familiar with it, and it was simple to set up and use.
 
 vim:syn=markdown
 
