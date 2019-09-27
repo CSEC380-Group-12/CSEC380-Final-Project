@@ -1,0 +1,43 @@
+.formBox {
+  border:2px solid black; 
+  width:500px; 
+  height: 500px;
+  padding:10px;
+  background: gainsboro; 
+  border-radius: 25px;
+  margin: auto;
+  text-align: center;
+}
+
+.formBox form{
+  display:flex;
+  flex-direction:column;
+}
+
+html {
+  color: black;
+  font-family: "Eras Bold ITC", Times, serif;
+}
+.username {
+  text-align: center;
+  color: white;
+  font-size: 50px;
+  margin: 40px;
+}
+.password {
+  text-align: center;
+  color: white;
+  font-size: 50px;
+  margin: 40px;
+}
+.submit {
+  width: 50%;
+  height: 20%;
+  text-align: center;
+  background: gray;
+  color: white;
+  font-size: 50px;
+  border-radius: 10px;
+  border:2px grey; 
+  margin: 40px;
+}
