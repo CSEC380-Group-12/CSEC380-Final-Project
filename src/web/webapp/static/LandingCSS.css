@@ -1,0 +1,27 @@
+#container{
+  display:flex;
+  height:100vh;
+}
+
+#quarter{
+  background-color:gainsboro;
+  height:100%;
+  width:250px;
+}
+
+#remainder{
+  background-color:white;
+  height:100%;
+  flex-grow:1;
+}
+.submit {
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: gray;
+  color: white;
+  font-size: 200%;
+  border-radius: 10px;
+  border:2px grey; 
+  margin: 40px;
+}
