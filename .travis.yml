@@ -17,7 +17,7 @@ before_install:
       - docker build -t apache2_hello_world src/apache2_hello_world
       - docker run -dit --name apache2_hello_world -p 80:80 apache2_hello_world
       - docker build -t database src/database
-      - docker run -dit --name database -p 80:80 database
+      - docker run -dit --name database -p 3306:3306 database
 
 # command to install dependencies
 install:
