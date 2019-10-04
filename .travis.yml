@@ -14,8 +14,10 @@ service:
 
 # building the docker cotainer
 before_install:
-      - docker build -t my-apache2 src/.
-      - docker run -dit --name hello-world -p 80:80 my-apache2
+      - docker build -t apache2_hello_world src/apache2_hello_world
+      - docker run -dit --name apache2_hello_world -p 80:80 apache2_hello_world
+      - docker build -t database src/database
+      - docker run -dit --name database -p 3306:3306 database
 
 # command to install dependencies
 install:
@@ -24,3 +26,4 @@ install:
 # command to run tests
 script:
       - pytest testing/
+
