@@ -1,6 +1,7 @@
 from flask import *
 
 app = Flask(__name__)
+app.secret_key = 'Make sure to change this to a really long, super secure password when testing is done!'
 
 # Session variables:
 # uid				int: The UID of the user that is logged in
@@ -8,8 +9,7 @@ app = Flask(__name__)
 # Checks if the current session is logged in.
 # @return			True if the current session is logged in, otherwise False.
 def is_session_logged_in():
-	# TODO - Make this actually check if the session is logged in
-	return True
+	return 'uid' in session
 
 # Processes a login request.
 # @param username	The username for the login request.
@@ -24,7 +24,17 @@ def process_login_request(username, password):
 		return False
 	else:
 		# TODO - Implement valid login handling here
+		session['uid'] = 1
 		return True
+
+# Processes a logout request.
+# @return			True if the logout was successful, otherwise False.
+def process_logout_request():
+	if not 'uid' in session:
+		return False
+	# TODO - Implement Logout Here
+	del session['uid']
+	return True
 
 @app.route('/')
 def route_index():
@@ -38,19 +48,23 @@ def route_login():
 	username = request.form['username']
 	password = request.form['password']
 	if process_login_request(username, password) == True:
-		return redirect('/invalid_login')
-	else:
 		return redirect('/')
+	else:
+		return redirect('/invalid_login')
 
 @app.route('/invalid_login')
 def route_invalid_login():
-	return render_template('login-fail.html')
+	if is_session_logged_in():
+		redirect('/')
+	else:
+		return render_template('login-fail.html')
 
 @app.route('/logout', methods=['POST'])
 def route_logout():
-	# TODO - Implement Logout Here
-	print(session)
-	return "<h1>Logout has not been implemented yet</h1>"
+	if process_logout_request() == True:
+		return redirect('/')
+	else:
+		abort(405)
 
 @app.route('/LoginCSS.css')
 def route_LoginCSS():
