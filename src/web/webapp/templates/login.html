@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <title>login</title>
-  <link rel="stylesheet" href="LoginCSS.css">
-</head>
+    <head>
+        <title>Col. Sander's Aresnal - Login</title>
+        <link rel="stylesheet" href="LoginCSS.css">
+    </head>
 
-	<body>
+    <body>
 
-		<div class="formBox">
-		  <form>
-			<label for="username" class="username">Username:</label><input id="username">
-			<label for="password" class="password">Password:</label><input id="password">
-		  </form>
-		  <button type="submit" class="submit">Log In</button>
-		</div>
+        <div class="formBox">
+            <form action="/login" method="post">
+                <label for="username" class="username">Username:</label>
+                <input type="text" name="username">
+                <label for="password" class="password">Password:</label>
+                <input type="password" name="password">
+                <button type="submit" class="submit">Log In</button>
+            </form>
+        </div>
 
-	<body>
+    </body>
 
 </html>
+
