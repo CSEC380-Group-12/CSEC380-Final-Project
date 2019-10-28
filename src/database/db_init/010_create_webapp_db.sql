@@ -10,12 +10,15 @@ CREATE TABLE accounts (
 );
 
 CREATE TABLE videos (
-	id		INTEGER PRIMARY KEY,
+	id		INTEGER PRIMARY KEY AUTO_INCREMENT,
 	uploader	INTEGER NOT NULL,
 	display_name	TINYTEXT,
 	video_file	TEXT NOT NULL UNIQUE,
+	upload_date DATE,
 	CONSTRAINT videos_uploader_fk FOREIGN KEY (uploader)
 		REFERENCES accounts(uid)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 );
 
 GRANT ALL PRIVILEGES ON webapp_db.* TO 'sanders'@'%'

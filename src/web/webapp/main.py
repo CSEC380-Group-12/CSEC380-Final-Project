@@ -1,7 +1,22 @@
 from flask import *
 from config import *
-import mysql.connector
+import pymysql
+import base64
+import datetime
+from os.path import isfile, join
+from mimetypes import MimeTypes
+from os import listdir
+from wand.image import Image
+import wand.image
+import hashlib
+import json
+import time
+import hmac
+import copy
 import sys
+import os
+
+import wand.image
 
 app = Flask(__name__)
 app.secret_key = 'Make sure to change this to a really long, super secure password when testing is done!'
@@ -62,6 +77,8 @@ def process_logout_request():
 	del session['uid']
 	return True
 
+
+
 @app.route('/')
 def route_index():
 	if is_session_logged_in():
@@ -85,6 +102,13 @@ def route_invalid_login():
 	else:
 		return render_template('login-fail.html')
 
+@app.route('/upload', methods=['POST'])
+def route_upload():
+	if is_session_logged_in():
+		return render_template('upload.html')
+	else:
+		return render_template('login.html')
+	
 @app.route('/logout', methods=['POST'])
 def route_logout():
 	if process_logout_request() == True:
@@ -99,6 +123,10 @@ def route_LoginCSS():
 @app.route('/LandingCSS.css')
 def route_LandingCSS():
 	return app.send_static_file('LandingCSS.css')
+
+@app.route('/UploadCSS.css')
+def route_UploadCSS():
+	return app.send_static_file('UploadCSS.css')
 
 # vim:tabstop=4
 # vim:shiftwidth=4
