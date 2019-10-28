@@ -17,3 +17,7 @@ CREATE TABLE videos (
 		REFERENCES accounts(uid)
 );
 
+GRANT ALL PRIVILEGES ON webapp_db.* TO 'sanders'@'%'
+	IDENTIFIED BY 'One day, Ihaq will rise again!';
+FLUSH PRIVILEGES;
+
