@@ -32,5 +32,14 @@ For testing our project, we chose [pytest testing framework](https://pytest.org/
 - extensive documentation
 - Detailed info on failing assert statements
 
+# Activity 3
+## Provide a link to the test cases you generated for this activity.
+## How do you ensure that users that navigate to the protected pages cannot bypass authentication requirements?
+## How do you protect against session fixation?
+## How do you ensure that if your database gets stolen passwords aren’t exposed?
+## How do you prevent password brute force?
+## How do you prevent username enumeration?
+## What happens if your sessionID is predictable, how do you prevent that?
+
 vim:syn=markdown
 
