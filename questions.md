@@ -41,5 +41,9 @@ For testing our project, we chose [pytest testing framework](https://pytest.org/
 ## How do you prevent username enumeration?
 ## What happens if your sessionID is predictable, how do you prevent that?
 
+# Activity 4
+## How do you prevent XSS is this step when displaying the username of the user who uploaded the video?
+## How do you ensure that users can’t delete videos that aren’t their own?
+
 vim:syn=markdown
 
