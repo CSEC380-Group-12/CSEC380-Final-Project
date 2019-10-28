@@ -4,5 +4,5 @@ FROM mariadb:latest
 
 # Copy all of the scripts db_init over. Any *.sql scripts in this directory
 # will be run in ls order to initialize the databases.
-COPY db_init/* /docker-entrypoint-initdb.d
+COPY db_init/* /docker-entrypoint-initdb.d/
 

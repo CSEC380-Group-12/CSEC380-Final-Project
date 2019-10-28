@@ -3,9 +3,10 @@ CREATE DATABASE webapp_db;
 USE webapp_db;
 
 CREATE TABLE accounts (
-	uid		INTEGER PRIMARY KEY,
+	uid		INTEGER PRIMARY KEY AUTO_INCREMENT,
 	username	TINYTEXT NOT NULL UNIQUE,
-	password	CHAR(128)
+	password	CHAR(128) NOT NULL,
+	password_salt	CHAR(8) NOT NULL
 );
 
 CREATE TABLE videos (
