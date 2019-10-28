@@ -32,12 +32,18 @@ def process_login_request(username, password):
 	# TODO - Implement Login Here
 	# For testing purposes, we will assume the username invalid is invalid and
 	# all other login requests are valid.
-	conn = db_conn()
-	cursor = conn.cursor(prepared=True)
-	res = cursor.execute(
-		'SELECT username, password FROM accounts WHERE username = %s', 
-		(username))
-	print(res, file=sys.stderr)
+	try:
+		conn = db_conn()
+		cursor = conn.cursor(prepared=True)
+		query = '''SELECT password, password_salt FROM accounts WHERE username = (%s)''' 
+		#query = '''SELECT * FROM accounts''' 
+		data = (username,)
+		res = cursor.execute(query, data)
+		print(res, file=sys.stderr)
+	except Exception as e:
+		print('SQL ERROR: '+e, file=sys.stderr)
+	finally:
+		conn.close()
 	if username == 'invalid': # TODO - Change this to check for a valid login
 		# TODO - Implement invalid login handling here
 		return False
