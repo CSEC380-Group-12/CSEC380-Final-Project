@@ -1,10 +1,23 @@
 from flask import *
+from config import *
+import mysql.connector
+import sys
 
 app = Flask(__name__)
 app.secret_key = 'Make sure to change this to a really long, super secure password when testing is done!'
 
 # Session variables:
 # uid				int: The UID of the user that is logged in
+
+# Connect to the Database
+def db_conn():
+	sql_conn = mysql.connector.connect(
+		host=db_host,
+		user=db_user,
+		passwd=db_passwd,
+		database=db_database
+	)
+	return sql_conn
 
 # Checks if the current session is logged in.
 # @return			True if the current session is logged in, otherwise False.
@@ -19,6 +32,12 @@ def process_login_request(username, password):
 	# TODO - Implement Login Here
 	# For testing purposes, we will assume the username invalid is invalid and
 	# all other login requests are valid.
+	conn = db_conn()
+	cursor = conn.cursor(prepared=True)
+	res = cursor.execute(
+		'SELECT username, password FROM accounts WHERE username = %s', 
+		(username))
+	print(res, file=sys.stderr)
 	if username == 'invalid': # TODO - Change this to check for a valid login
 		# TODO - Implement invalid login handling here
 		return False
