@@ -33,18 +33,38 @@ def process_login_request(username, password):
 	# For testing purposes, we will assume the username invalid is invalid and
 	# all other login requests are valid.
 	conn = None
+	cursor = None
 	try:
 		conn = db_conn()
-		cursor = conn.cursor(prepared=True)
-		query = '''SELECT password, password_salt FROM accounts WHERE username = (%s)''' 
+		cursor = conn.cursor()
+		#cursor = conn.cursor(buffered=True)
+		query = '''SELECT uid, password, password_salt FROM accounts WHERE username = (%s)''' 
 		data = (username,)
-		res = cursor.execute(query, data)
-		print(res, file=sys.stderr)
+		cursor.execute(query, data)
+		# Username does not exist
+		if cursor.rowcount <= 0:
+			print('Login Error: Invalid username '+username, file=sys.stderr)
+			return False
+		#uid, db_passwd_hash, salt = cursor.fetchone()
+		#user_passwd_hash = hashlib.sha256(password+salt)
+		#print(user_passwd_hash+':'+db_passwd_hash, file=sys.stderr)
+		# At this point, the login is valid
+		session['uid'] = uid
+		return True
 	except Exception as e:
-		print('SQL ERROR: '+e, file=sys.stderr)
+		# Some error occurred, so fail the login
+		print('Login Error: exception error (user '+username+')', file=sys.stderr)
+		return False
 	finally:
 		if conn != None:
 			conn.close()
+		if cursor != None:
+			cursor.close()
+
+	# Fail the login as a last resort
+	print('Login Error: unknown error (user '+username+')', file=sys.stderr)
+	return False
+
 	if username == 'invalid': # TODO - Change this to check for a valid login
 		# TODO - Implement invalid login handling here
 		return False
