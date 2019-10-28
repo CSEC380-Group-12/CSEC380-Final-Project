@@ -14,14 +14,44 @@
   height:100%;
   flex-grow:1;
 }
-.submit {
+
+.UP {
+  font-family: "Lucida Console", Times, serif;
   width: 175px;
   height: 100px;
   text-align: center;
-  background: gray;
+  background: #0398fc;
   color: white;
-  font-size: 200%;
-  border-radius: 10px;
+  font-size: 220%;
+  border-radius: 20px;
+  border:2px grey; 
+  margin: 40px;
+}
+
+.DLT {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #f54747;
+  color: white;
+  font-size: 220%;
+  border-radius: 20px;
+  
+  border:2px grey;
+  margin: 40px;
+}
+
+.LGOUT {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #2b2929;
+  color: white;
+  font-size: 220%;
+  word-spacing: -8px;
+  border-radius: 20px;
   border:2px grey; 
   margin: 40px;
 }
