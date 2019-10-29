@@ -21,6 +21,7 @@ from werkzeug.utils import secure_filename
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import CORS, cross_origin
+import hashlib
 import wand.image
 
 # Session variables:
@@ -63,14 +64,15 @@ def process_login_request(username, password):
         # Connect to the Database
         conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
         cursor = conn.cursor()
-        cur_hash = generate_password_hash(password)
+        hash_object = hashlib.md5(password.encode())
+        cur_hash = hash_object.hexdigest()
         # Retrieve user data (uid, password_hash)
-        query = '''SELECT userID, password_hash FROM accounts WHERE username = (%s)'''
+        query = '''SELECT userID, pass_hash FROM accounts WHERE username = (%s)'''
         data = (username,)
         cursor.execute(query, data)
         for (userID, password_hash) in cursor:
             # validate password hash
-            if check_password_hash(password_hash, cur_hash):
+            if password_hash == cur_hash:
                 session['username'] = username
                 session['uid'] = userID
                 return True
@@ -99,20 +101,33 @@ def process_logout_request():
 def create_test_users():
     # Add a test user
 
-	conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-	cursor = conn.cursor()
-	testuser1 = 'admin'
-	testuser1hashedpass = generate_password_hash('admin')
-	cursor.execute(f"INSERT INTO accounts(username, password_hash) VALUES ('{testuser1}', '{testuser1hashedpass}')")
-	cursor.close()
-	conn.commit()
-	conn.close()
-	CREATE_TEST_USER = False
+    conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+    cursor = conn.cursor()
+    testuser1 = 'admin2'
+    password = 'admin2'
+    hash_object = hashlib.md5(password.encode())
+    test_hash = hash_object.hexdigest()
+
+    query = '''SELECT userID, pass_hash FROM accounts WHERE username = (%s)'''
+    data = (testuser1,)
+    cursor.execute(query, data)
+    print("here", file=sys.stderr)
+    for (userID, password_hash) in cursor:
+        if password_hash == test_hash:
+            return
+        else:
+            cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
+
+    cursor.close()
+    conn.commit()
+    conn.close()
+
+
  
 @app.route('/')
 def route_index():
     if is_session_logged_in():
-        return render_template('idex.html')
+        return render_template('index.html')
     else:
         return render_template('login.html')
 

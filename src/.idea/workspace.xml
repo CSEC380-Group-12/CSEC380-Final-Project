@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a4d9a0fd-3a70-4f60-88b0-8e6d1c5637da" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/db_init/010_create_webapp_db.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database/db_init/010_create_webapp_db.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/db_init/020_add_users.sql" beforeDir="false" afterPath="$PROJECT_DIR$/database/db_init/020_add_users.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/webapp/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/webapp/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/web/webapp/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/webapp/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/webapp/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/web/webapp/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/webapp/templates/landing.html" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +57,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1572295095175</updated>
-      <workItem from="1572295096365" duration="864000" />
+      <workItem from="1572295096365" duration="5008000" />
     </task>
     <servers />
   </component>
