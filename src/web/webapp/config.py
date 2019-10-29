@@ -5,6 +5,6 @@
 # Database
 db_host = 'database'
 db_database = 'webapp_db'
-db_user = 'sanders'
-db_passwd = 'One day, Ihaq will rise again!'
+db_user = 'root'
+db_passwd = 'toor'
 

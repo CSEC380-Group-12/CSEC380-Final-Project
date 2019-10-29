@@ -1,3 +1,7 @@
 flask
 Wand
 pymysql
+werkzeug
+flask_limiter
+flask_cors
+requests

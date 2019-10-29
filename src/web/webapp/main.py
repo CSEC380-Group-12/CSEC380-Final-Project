@@ -15,139 +15,162 @@ import hmac
 import copy
 import sys
 import os
-
+import requests
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_cors import CORS, cross_origin
 import wand.image
-
-app = Flask(__name__)
-app.secret_key = 'Make sure to change this to a really long, super secure password when testing is done!'
 
 # Session variables:
 # uid				int: The UID of the user that is logged in
 
-# Connect to the Database
-def db_conn():
-	sql_conn = mysql.connector.connect(
-		host=db_host,
-		user=db_user,
-		passwd=db_passwd,
-		database=db_database
-	)
-	return sql_conn
+CREATE_TEST_USER = True
+time.sleep(25)
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, static_url_path='/static', template_folder='templates')
+app.secret_key = os.urandom(24)
+
+# rate limit for password brute force
+
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["28000 per day", "1000 per hour", "20 per minute"]
+)
+
+# configure CORS
+
+app.config['CORS_HEADERS'] = 'Content-Type'
+cors = CORS(app)
+
 
 # Checks if the current session is logged in.
 # @return			True if the current session is logged in, otherwise False.
 def is_session_logged_in():
-	return 'uid' in session
+    return 'uid' in session
+
 
 # Processes a login request.
 # @param username	The username for the login request.
 # @param password	The password for the login request.
 # @return			True if the login is successful/valid, otherwise False.
 def process_login_request(username, password):
-	# TODO - Implement Login Here
-	# For testing purposes, we will assume the username invalid is invalid and
-	# all other login requests are valid.
-	conn = None
-	cursor = None
-	try:
-		conn = db_conn()
-		cursor = conn.cursor()
-		#cursor = conn.cursor(buffered=True)
-		query = '''SELECT uid, password, password_salt FROM accounts WHERE username = (%s)''' 
-		data = (username,)
-		cursor.execute(query, data)
-		# Username does not exist
-		if cursor.rowcount <= 0:
-			print('Login Error: Invalid username '+username, file=sys.stderr)
-			return False
-		#uid, db_passwd_hash, salt = cursor.fetchone()
-		#user_passwd_hash = hashlib.sha256(password+salt)
-		#print(user_passwd_hash+':'+db_passwd_hash, file=sys.stderr)
-		# At this point, the login is valid
-		session['uid'] = uid
-		return True
-	except Exception as e:
-		# Some error occurred, so fail the login
-		print('Login Error: exception error (user '+username+')', file=sys.stderr)
-		return False
-	finally:
-		if conn != None:
-			conn.close()
-		if cursor != None:
-			cursor.close()
+    conn = None
+    cursor = None
+    try:
+        # Connect to the Database
+        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+        cursor = conn.cursor()
+        cur_hash = generate_password_hash(password)
+        # Retrieve user data (uid, password_hash)
+        query = '''SELECT userID, password_hash FROM accounts WHERE username = (%s)'''
+        data = (username,)
+        cursor.execute(query, data)
+        for (userID, password_hash) in cursor:
+            # validate password hash
+            if check_password_hash(password_hash, cur_hash):
+                session['username'] = username
+                session['uid'] = userID
+                return True
+            return False
+    except Exception as e:
+        # Some error occurred, so fail the login
+        print('Login Error: exception error (user ' + username + ')', file=sys.stderr)
+        return False
+    finally:
+        if conn is not None:
+            conn.close()
+        if cursor is not None:
+            cursor.close()
 
-	# Fail the login as a last resort
-	print('Login Error: unknown error (user '+username+')', file=sys.stderr)
-	return False
-
-	if username == 'invalid': # TODO - Change this to check for a valid login
-		# TODO - Implement invalid login handling here
-		return False
-	else:
-		# TODO - Implement valid login handling here
-		session['uid'] = 1
-		return True
 
 # Processes a logout request.
 # @return			True if the logout was successful, otherwise False.
 def process_logout_request():
-	if not 'uid' in session:
-		return False
-	# TODO - Implement Logout Here
-	del session['uid']
-	return True
+    if 'uid' not in session:
+        return False
+    # TODO - Implement Logout Here
+    session.pop('uid', None)
+    flash('You were logged out.')
+    return True
 
+def create_test_users():
+    # Add a test user
 
-
+	conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+	cursor = conn.cursor()
+	testuser1 = 'admin'
+	testuser1hashedpass = generate_password_hash('admin')
+	cursor.execute(f"INSERT INTO accounts(username, password_hash) VALUES ('{testuser1}', '{testuser1hashedpass}')")
+	cursor.close()
+	conn.commit()
+	conn.close()
+	CREATE_TEST_USER = False
+ 
 @app.route('/')
 def route_index():
-	if is_session_logged_in():
-		return render_template('landing.html')
-	else:
-		return render_template('login.html')
+    if is_session_logged_in():
+        return render_template('idex.html')
+    else:
+        return render_template('login.html')
 
-@app.route('/login', methods=['POST'])
+
+@app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("14400/day;600/hour;10/minute")
 def route_login():
-	username = request.form['username']
-	password = request.form['password']
-	if process_login_request(username, password) == True:
-		return redirect('/')
-	else:
-		return redirect('/invalid_login')
+    if CREATE_TEST_USER:
+        create_test_users()
+    
+    if request.method == 'GET':
+        return redirect('http://localhost:5000')
+
+    username = request.form['username']
+    password = request.form['password']
+    if process_login_request(username, password) == True:
+        return redirect('/')
+    else:
+        return redirect('/invalid_login')
+
 
 @app.route('/invalid_login')
 def route_invalid_login():
-	if is_session_logged_in():
-		redirect('/')
-	else:
-		return render_template('login-fail.html')
+    if is_session_logged_in():
+        redirect('/')
+    else:
+        return render_template('login-fail.html')
+
 
 @app.route('/upload', methods=['POST'])
 def route_upload():
-	if is_session_logged_in():
-		return render_template('upload.html')
-	else:
-		return render_template('login.html')
-	
-@app.route('/logout', methods=['POST'])
+    if is_session_logged_in():
+        return render_template('upload.html')
+    else:
+        return render_template('login.html')
+
+
+@app.route('/logout', methods=['GET', 'POST'])
 def route_logout():
-	if process_logout_request() == True:
-		return redirect('/')
-	else:
-		abort(405)
+    if process_logout_request() == True:
+        return redirect('/')
+    else:
+        abort(405)
+
 
 @app.route('/LoginCSS.css')
 def route_LoginCSS():
-	return app.send_static_file('LoginCSS.css')
+    return app.send_static_file('LoginCSS.css')
+
 
 @app.route('/LandingCSS.css')
 def route_LandingCSS():
-	return app.send_static_file('LandingCSS.css')
+    return app.send_static_file('LandingCSS.css')
+
 
 @app.route('/UploadCSS.css')
 def route_UploadCSS():
-	return app.send_static_file('UploadCSS.css')
+    return app.send_static_file('UploadCSS.css')
 
 # vim:tabstop=4
 # vim:shiftwidth=4
-
