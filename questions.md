@@ -45,5 +45,16 @@ For testing our project, we chose [pytest testing framework](https://pytest.org/
 ## How do you prevent XSS is this step when displaying the username of the user who uploaded the video?
 ## How do you ensure that users can’t delete videos that aren’t their own?
 
+# Activity 5
+## How would you fix your code so that these issues were no longer present?
+## What are the limitations, if any that, of the SQL Injection issues you’ve included? 
+
+# Activity 6
+## How would you fix your code so that this issue is no longer present?
+## How does your test demonstrate SSRF as opposed to just accessing any old endpoint.
+
+# Activity 7
+## How would you fix your code so that this issue is no longer present?
+
 vim:syn=markdown
 
