@@ -1,13 +1,11 @@
 from flask import *
-from config import *
+from common import *
 import pymysql
 import base64
 import datetime
 from os.path import isfile, join
 from mimetypes import MimeTypes
 from os import listdir
-from wand.image import Image
-import wand.image
 import hashlib
 import json
 import time
@@ -15,14 +13,11 @@ import hmac
 import copy
 import sys
 import os
-import requests
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import CORS, cross_origin
 import hashlib
-import wand.image
+from common import *
 
 # Session variables:
 # uid				int: The UID of the user that is logged in
@@ -62,7 +57,7 @@ def process_login_request(username, password):
     cursor = None
     try:
         # Connect to the Database
-        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+        conn = pymysql.connect(db_host, db_user, db_passwd, db_database, charset='utf8mb4')
         cursor = conn.cursor()
         hash_object = hashlib.md5(password.encode())
         cur_hash = hash_object.hexdigest()

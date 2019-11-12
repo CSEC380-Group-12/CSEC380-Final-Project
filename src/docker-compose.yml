@@ -2,24 +2,22 @@ version: '3'
 services:
   web:
     build: ./web
-    links:
-      - database
     depends_on:
       - database
+    networks:
+      - csec380
     ports:
       - "80:5000"
       
   database:
     build: ./database
     command: --max-allowed-packet=64MB
-    ports:
-      - "3306:3306"
+    networks:
+      - csec380
     environment:
-      # - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      MYSQL_ROOT_PASSWORD: toor
-      MYSQL_ROOT_HOST: 0.0.0.0
-      MYSQL_USER: root
-      MYSQL_PASSWORD: toor
-      MYSQL_DATABASE: webapp_db
+      - MYSQL_ROOT_PASSWORD=toor
+      - MYSQL_DATABASE=webapp_db
 
-
+networks:
+  csec380:
+      driver: bridge
