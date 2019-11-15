@@ -9,6 +9,14 @@
   text-align: center;
 }
 
+.container2 {
+  padding-top: 5px;
+}
+
+.body {
+  padding-top: 20px;
+}
+
 .formBox form{
   display:flex;
   flex-direction:column;
@@ -18,6 +26,7 @@ html {
   color: black;
   font-family: "Lucida Console", Times, serif;
 }
+
 
 .username {
   text-align: center;
@@ -49,24 +58,12 @@ input {
   margin: 0 auto;
 }
 
-.submit {
-  font-family: "Lucida Console", Times, serif;
-  font-weight: bold;
-  word-spacing: -17px;
-  width: 60%;
-  height: 14%;
-  text-align: center;
-  margin-top: 20px;
-  margin-left: 80px;
-  background: gray;
-  color: white;
-  font-size: 50px;
-  border-radius: 10px;
-  border:2px grey; 
-}
 
 .loginFail{
   font-family: "Lucida Console", Times, serif;
   color: red;
   font-weight: bold;
+  margin: auto;
+  width: 80%;
+  padding: 10px;
 }
