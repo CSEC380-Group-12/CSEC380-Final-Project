@@ -9,7 +9,7 @@ branches:
   only:
     - master
     - travis
-    - Bad3r
+    - bad3r
 
 service:
   - docker
@@ -28,6 +28,8 @@ jobs:
       install:
         - pip3 install -r requirements.txt
 
+      script:
+        - pytest testing/test_hello_world.py
     - stage: test
       # command to run tests
       script:
