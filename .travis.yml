@@ -21,15 +21,17 @@ jobs:
   include:
     - stage: deploy
       # building the docker cotainer
-      before_install:
-        - docker-compose -f src/docker-compose.yml up -d --build
+      # before_install:
+      #   - docker-compose -f src/docker-compose.yml up -d --build
 
       # command to install dependencies
       install:
         - pip3 install -r requirements.txt
 
       script:
-        - pytest testing/test_hello_world.py
+        # - pytest testing/test_hello_world.py
+        - docker-compose -f src/docker-compose.yml up -d --build
+
     - stage: test
       # command to run tests
       script:
