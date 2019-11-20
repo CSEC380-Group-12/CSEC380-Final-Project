@@ -25,7 +25,7 @@ CREATE TABLE videos (
 );
 
 
-GRANT ALL PRIVILEGES ON webapp_db.* TO 'root'@'localhost'
+GRANT ALL PRIVILEGES ON webapp_db.* TO 'root'@'0.0.0.0'
 	IDENTIFIED BY 'toor';
 FLUSH PRIVILEGES;
 

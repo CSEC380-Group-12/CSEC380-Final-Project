@@ -23,7 +23,7 @@ from common import *
 # uid				int: The UID of the user that is logged in
 
 CREATE_TEST_USER = True
-time.sleep(25)
+# time.sleep(25)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='/static', template_folder='templates')
 app.secret_key = os.urandom(24)
@@ -166,6 +166,24 @@ def route_logout():
         return redirect('/')
     else:
         abort(405)
+abort
+@app.route('/returnToBrowse', methods=['GET', 'POST'])
+def route_return():
+    if is_session_logged_in():
+        return redirect('/')
+    else:
+        abort(405)
+
+@app.route('/delete', methods=['GET', 'POST'])
+def route_delete():
+    if is_session_logged_in():
+        return render_template('delete.html')
+    else:
+        return render_template('login.html')
+
+@app.route('/DeleteCSS.css')
+def route_DeleteCSS():
+    return app.send_static_file('DeleteCSS.css')
 
 
 @app.route('/LoginCSS.css')
