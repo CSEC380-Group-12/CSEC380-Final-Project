@@ -1,17 +1,8 @@
 # imports
-from flask import render_template, redirect, url_for, request, abort, session, send_from_directory
+import flask
+from flask import Flask, render_template, redirect, url_for, request, abort, session, send_from_directory, flash
 from common import *
 import pymysql
-import base64
-import datetime
-from os.path import isfile, join
-from mimetypes import MimeTypes
-from os import listdir
-import hashlib
-import json
-import time
-import hmac
-import copy
 import sys
 import os
 from flask_limiter import Limiter
@@ -19,18 +10,18 @@ from flask_limiter.util import get_remote_address
 from flask_cors import CORS, cross_origin
 import hashlib
 from common import *
+import secrets
 
-# Session variables:
-# uid				int: The UID of the user that is logged in
-
+# flask init
 CREATE_TEST_USER = True
-# time.sleep(25)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='/static', template_folder='templates')
-app.secret_key = os.urandom(24)
+
+# flask session init
+app.secret_key = secrets.token_bytes(64)
+app.config['SESSION_TYPE'] = 'filesystem'
 
 # rate limit for password brute force
-
 limiter = Limiter(
     app,
     key_func=get_remote_address,
@@ -38,7 +29,6 @@ limiter = Limiter(
 )
 
 # configure CORS
-
 app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app)
 
@@ -119,7 +109,6 @@ def create_test_users():
     conn.close()
 
 
- 
 @app.route('/')
 def route_index():
     if is_session_logged_in():

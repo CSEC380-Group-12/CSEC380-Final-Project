@@ -1,3 +1,4 @@
+---
 version: '3'
 services:
   web:
@@ -6,9 +7,11 @@ services:
       - database
     networks:
       - csec380
+    environment:
+      - FLASK_ENV=development
     ports:
       - "80:5000"
-      
+
   database:
     build: ./database
     command: --max-allowed-packet=64MB
@@ -20,4 +23,4 @@ services:
 
 networks:
   csec380:
-      driver: bridge
+    driver: bridge
