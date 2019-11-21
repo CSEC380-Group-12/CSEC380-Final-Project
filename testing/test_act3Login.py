@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 """
-act3Login.py: test the content/body of an HTML page
+test_act3Login.py: test the content/body of an HTML page
 Author: Brendan
 """
 
