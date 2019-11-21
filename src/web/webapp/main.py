@@ -11,6 +11,7 @@ from flask_cors import CORS, cross_origin
 import hashlib
 from common import *
 import secrets
+from werkzeug.utils import secure_filename
 
 # flask init
 CREATE_TEST_USER = True
@@ -122,13 +123,13 @@ def route_index():
 def route_login():
     if CREATE_TEST_USER:
         create_test_users()
-    
+
     if request.method == 'GET':
         return redirect('http://localhost:5000')
 
     username = request.form['username']
     password = request.form['password']
-    if process_login_request(username, password) == True:
+    if process_login_request(username, password) is True:
         return redirect('/')
     else:
         return redirect('/invalid_login')
@@ -142,12 +143,55 @@ def route_invalid_login():
         return render_template('login-fail.html')
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['GET'])
 def route_upload():
     if is_session_logged_in():
         return render_template('upload.html')
     else:
         return render_template('login.html')
+
+
+def allowed_files(filename):
+    allowed_extensions = {'mp4', 'txt'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post if the post request contains a file
+        if 'file' not in request.files:
+            flash('no file selected')
+            return redirect("/uploadFail")
+        file = request.files['file']
+        if len(file.filename) < 1:
+            flash("No file selected")
+            return redirect("/uploadFail")
+            
+        if file and allowed_files(file.filename):
+            filename = secure_filename(file.filename)
+            # TODO: save file to db
+            flash('File successfully uploaded')
+            return redirect('/uploadSuccess')
+        else:
+            return redirect('/uploadFail')
+    else:
+        return render_template("/upload")
+
+@app.route('/uploadSuccess', methods=['POST', 'GET'])
+def route_upload_success():
+    if is_session_logged_in():
+        return render_template("uploadSuccess.html")
+    else:
+        return redirect("/login")
+
+
+@app.route('/uploadFail', methods=['POST', 'GET'])
+def route_upload_fail():
+    if is_session_logged_in():
+        return render_template("uploadFail.html")
+    else:
+        return redirect("/login")
 
 
 @app.route('/logout', methods=['GET', 'POST'])
@@ -156,13 +200,15 @@ def route_logout():
         return redirect('/')
     else:
         abort(405)
-abort
+
+
 @app.route('/returnToBrowse', methods=['GET', 'POST'])
 def route_return():
     if is_session_logged_in():
         return redirect('/')
     else:
-        abort(405)
+        return redirect("/login")
+
 
 @app.route('/delete', methods=['GET', 'POST'])
 def route_delete():
@@ -170,6 +216,7 @@ def route_delete():
         return render_template('delete.html')
     else:
         return render_template('login.html')
+
 
 @app.route('/DeleteCSS.css')
 def route_DeleteCSS():

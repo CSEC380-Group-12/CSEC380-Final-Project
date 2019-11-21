@@ -2,37 +2,49 @@
 <html>
 
 	<head>
-		<title>Col. Sander's Arsenal</title>
+		<title>video upload</title>
 		<link rel="stylesheet" href="UploadCSS.css">
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 	</head>
 
+			<p>
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					<ul class=flashes>
+					{% for message in messages %}
+						<li>{{ message }}</li>
+					{% endfor %}
+					</ul>
+				{% endif %}
+			{% endwith %}
+		</p>
 	<body>
 
 		<div id="container">
 			<div id="quarter">
-				<form action="/returnToBrowse" method="post">
+				<form action="/returnToBrowse" method="GET">
 					<button class="RTB">RETURN TO BROWSE</button>
 				</form>
 				
-				<form action="/logout" method="post">
-					<button class="LGOUT">LOG OUT</button>
+				<form action="/logout" method="GET">
+					<button class="LOGOUT">LOG OUT</button>
 				</form>
 			</div>
 			
 			<div id="quarter2">
-				<form action="/uploadVid" method="post">
+				<form action="/upload" method="POST" enctype="multipart/form-data">
 					<ul style="list-style-type: none;">
-						<li>
+						<dl>
 							<label for="vidPath" class="vidText">URL OR FILEPATH TO VIDEO:</label>
-							<input type="text" name="vidPath">
-						</li>
+							<input type="file" name="file" autocomplete="off" required>
+						</dl>
 						
 						<li>
 							<label for="vidName" class="vidText">VIDEO TITLE:</label>
 							<input type="text" name="vidName">
 						</li>
+
 						<button class="UP">UPLOAD</button>
 					</ul>
 				</form>		  
