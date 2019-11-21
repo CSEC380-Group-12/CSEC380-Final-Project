@@ -22,7 +22,7 @@
   text-align: center;
   background: #0398fc;
   color: white;
-  font-size: 200%;
+  font-size: 165%;
   border-radius: 20px;
   border:2px grey; 
   margin: 40px;
@@ -35,7 +35,7 @@
   text-align: center;
   background: #2b2929;
   color: white;
-  font-size: 220%;
+  font-size: 165%;
   word-spacing: -8px;
   border-radius: 20px;
   border:2px grey; 
@@ -71,6 +71,10 @@ input {
   height: 40px;
   width: 250px;
   margin: 0 auto;
+}
+
+ul {
+padding-top: 20px;
 }
 
 .DLT {

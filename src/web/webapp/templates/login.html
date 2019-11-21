@@ -4,20 +4,27 @@
     <head>
         <title>Col. Sander's Aresnal - Login</title>
         <link rel="stylesheet" href="LoginCSS.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     </head>
 
     <body>
+	
+		<div class="container">
+		  <form action="/login" method="post">
+			<div class="form-group">
+			  <label for="username">Username:</label>
+			  <input type="username" class="form-control" id="email" placeholder="Enter username" name="username">
+			</div>
+			<div class="form-group">
+			  <label for="password">Password:</label>
+			  <input type="password" class="form-control" id="password" placeholder="Enter password" name="password">
+			</div>
+			<div class ="col text-center">
+				<button type="submit" class="btn btn-outline-dark">Log In!</button>
+			</div>
+		  </form>
+		</div>
 
-        <div class="formBox">
-            <form action="/login" method="post">
-                <label for="username" class="username">Username:</label>
-                <input type="text" name="username">
-                <label for="password" class="password">Password:</label>
-                <input type="password" name="password">
-                <button type="submit" class="submit">Log In</button>
-            </form>
-        </div>
-
-    </body>
 
 </html>
