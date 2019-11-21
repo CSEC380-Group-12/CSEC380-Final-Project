@@ -40,6 +40,7 @@ UPLOAD_DIR = '/videos'
 # TODO: exploit this ? makedir -> and call back ?
 cmd=f"mkdir -p {UPLOAD_DIR}"
 output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
+CREATE_TEST_USER = True
 
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_DIR
@@ -102,22 +103,24 @@ def create_test_users():
     # Add a test user
     conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
     cursor = conn.cursor()
-    testuser1 = 'admin2'
-    password = 'admin2'
+    testuser1 = 'admin'
+    password = 'admin'
     hash_object = hashlib.md5(password.encode())
     test_hash = hash_object.hexdigest()
 
-    query = '''SELECT userID, pass_hash FROM accounts WHERE username = (%s)'''
-    data = (testuser1,)
-    cursor.execute(query, data)
+    query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{testuser1}'"
+    conn.commit()
+    cursor.execute(query)
     print("here", file=sys.stderr)
-    for (userID, password_hash) in cursor:
-        if password_hash != test_hash:
-            cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
-
+    cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
+    print(f"added test user: {testuser1}")
     cursor.close()
     conn.commit()
     conn.close()
+
+    global CREATE_TEST_USER
+    CREATE_TEST_USER = False
+
 
 
 def process_file_upload(title, filename):
@@ -151,6 +154,10 @@ def route_login():
 
     username = request.form['username']
     password = request.form['password']
+    if username == "admin2" and CREATE_TEST_USER:
+        create_test_users()
+        return redirect("/login")
+
     if process_login_request(username, password) is True:
         return redirect('/')
     else:
@@ -279,7 +286,5 @@ def route_UploadCSS():
     return app.send_static_file('UploadCSS.css')
 
 
-
-create_test_users()
 # vim:tabstop=4
 # vim:shiftwidth=4
