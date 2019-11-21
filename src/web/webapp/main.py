@@ -27,7 +27,6 @@ CREATE_TEST_USER = True
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='/static', template_folder='templates')
 app.secret_key = os.urandom(24)
-app.debug = True
 
 # rate limit for password brute force
 
