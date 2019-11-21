@@ -1,4 +1,6 @@
 # Flask imports
+from queue import Queue
+
 import flask
 from flask import Flask, render_template, redirect, url_for, request, abort, session, send_from_directory, flash
 from flask_limiter import Limiter
@@ -15,11 +17,12 @@ import time
 import hashlib
 import secrets
 from werkzeug.utils import secure_filename
-
-
+from threading import Thread
+# TODO: new merge broke upload check why
 # flask init
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='/static', template_folder='templates')
+
 
 # flask session init
 app.secret_key = secrets.token_bytes(64)
@@ -36,10 +39,11 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app)
 
 # Upload variables
-UPLOAD_DIR = '/videos'
+UPLOAD_DIR = f'{app.static_url_path}/uploads'
 # TODO: exploit this ? makedir -> and call back ?
 cmd=f"mkdir -p {UPLOAD_DIR}"
 output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
+
 CREATE_TEST_USER = True
 
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv'}
@@ -122,9 +126,56 @@ def create_test_users():
     CREATE_TEST_USER = False
 
 
+def database_checker():
+    while True:
+        try:
+            conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+            with conn.cursor() as cursor:
+                query = f"SELECT userID FROM accounts WHERE username = 'brendy';"
+                cursor.execute(query)
+                conn.commit()
+                uid = cursor.fetchone()
+                conn.close()
+                print(f"ID of brendy:{uid}", flush=True)
+                if int(uid) == 2:
+                    return
+        except:
+            print("still waiting", flush=True)
+            time.sleep(10)
+            continue
 
-def process_file_upload(title, filename):
+
+
+def allowed_files(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def video_checker():
+    print(f"The form:\n{request.form}")
+    for key in request.form:
+        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", flush=True)
+        print("key: {0}, value: {1}".format(key, request.form[key]), flush=True)
+        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", flush=True)
+
+    # check if the post if the post request contains a file
+    if 'file' not in request.files:
+        print('no file selected', flush=True)
+        return False
+    # check file name length
+    elif len(file.filename) < 1:
+            print('no file name', flush=True)
+            return False
+    elif file and allowed_files(file.filename):
+        return True
+    
+
+def process_file_upload():
+    title = request.form.get('vidName', '')
+    video = request.files['file']
+    filename = secure_filename(video.filename) # generate a secure name
+
     try:
+        # add video metadata to the database
         conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
         cursor = conn.cursor()
         userID = session['uid']
@@ -133,17 +184,32 @@ def process_file_upload(title, filename):
         cursor.close()
         conn.commit()
         conn.close()
-        return True
-    except Exception:
-        return False
+        # save the video
+        video.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+    except Exception as e:
+        print(e, flush=True)
+        return None
+
+    return filename
+
 
 
 @app.route('/')
-def route_index():
+def route_index():  
+    # app_name = os.getenv("APP_NAME")  
     if is_session_logged_in():
         return render_template('index.html')
     else:
         return render_template('login.html')
+
+
+@app.route('/returnToBrowse', methods=['GET', 'POST'])
+def route_return():
+    if is_session_logged_in():
+        return redirect('/')
+    else:
+        return redirect("/login")
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -171,6 +237,13 @@ def route_invalid_login():
     else:
         return render_template('login-fail.html')
 
+@app.route('/logout', methods=['GET', 'POST'])
+def route_logout():
+    if process_logout_request():
+        return redirect('/')
+    else:
+        redirect('/login')
+
 
 @app.route('/upload', methods=['GET'])
 def route_upload():
@@ -180,43 +253,20 @@ def route_upload():
         return render_template('login.html')
 
 
-def allowed_files(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
-    if request.method == 'POST':
-        print("################# REQUEST")
-        print(request)
-        print("################# REQUEST_DATA")
-        print(request.data)
-        # check if the post if the post request contains a file
-        if 'file' not in request.files:
-            flash('no file selected')
-            return redirect("/uploadFail")
-        file = request.files['file']
-        if len(file.filename) < 1:
-            flash("No file selected")
-            return redirect("/uploadFail")
-            
-        if file and allowed_files(file.filename):
-            filename = secure_filename(file.filename)
-            # TODO: save file to db
-            flash('File successfully uploaded')
-            title = 'null'
-            if process_file_upload(title, filename):
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                return redirect('/uploadSuccess')
-                # TODO: maybe
-                # return redirect(url_for('uploaded_file',
-                #                         filename=filename))
+    if is_session_logged_in():
+        if video_checker():
+            filename = process_file_upload()
+            if filename is not None:
+                return redirect(url_for('static/uploads', filename=filename))
+                # return redirect('/uploadSuccess')
             else:
                 return redirect('/uploadFail')
         else:
             return redirect('/uploadFail')
-    else:
-        return render_template("/upload")
+    return redirect('/upload')
+
 
 # serving of the uploaded files
 # redirect the user to /uploads/filename
@@ -242,22 +292,6 @@ def route_upload_fail():
         return redirect("/login")
 
 
-@app.route('/logout', methods=['GET', 'POST'])
-def route_logout():
-    if process_logout_request() == True:
-        return redirect('/')
-    else:
-        abort(405)
-
-
-@app.route('/returnToBrowse', methods=['GET', 'POST'])
-def route_return():
-    if is_session_logged_in():
-        return redirect('/')
-    else:
-        return redirect("/login")
-
-
 @app.route('/delete', methods=['GET', 'POST'])
 def route_delete():
     if is_session_logged_in():
@@ -268,23 +302,33 @@ def route_delete():
 
 @app.route('/DeleteCSS.css')
 def route_DeleteCSS():
-    return app.send_static_file('DeleteCSS.css')
+    return app.send_static_file('CSS/DeleteCSS.css')
 
 
 @app.route('/LoginCSS.css')
 def route_LoginCSS():
-    return app.send_static_file('LoginCSS.css')
+    return app.send_static_file('CSS/LoginCSS.css')
 
 
 @app.route('/LandingCSS.css')
 def route_LandingCSS():
-    return app.send_static_file('LandingCSS.css')
+    return app.send_static_file('CSS/LandingCSS.css')
 
 
 @app.route('/UploadCSS.css')
 def route_UploadCSS():
-    return app.send_static_file('UploadCSS.css')
+    return app.send_static_file('CSS/UploadCSS.css')
 
+
+if __name__ == '__main__':
+    # q = Queue()
+    # t = Thread(target=database_checker)
+    # t.start()
+    app.run(host='0.0.0.0')
+    # q.join()
+    # q.put(None)
+    # t.join()views
 
 # vim:tabstop=4
 # vim:shiftwidth=4
+

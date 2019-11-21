@@ -5,6 +5,6 @@
 # Database
 db_host = 'database'
 db_database = 'webapp_db'
-db_user = 'root'
-db_passwd = 'toor'
+db_user = 'flask'
+db_passwd = 'flask'
 

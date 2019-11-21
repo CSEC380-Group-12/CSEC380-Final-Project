@@ -4,5 +4,4 @@ pymysql
 flask_limiter
 flask_cors
 requests
-werkzeug
-
+lxml

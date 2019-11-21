@@ -26,7 +26,9 @@ CREATE TABLE videos (
 );
 
 
-GRANT ALL PRIVILEGES ON webapp_db.* TO 'root'@'0.0.0.0'
-	IDENTIFIED BY 'toor';
+-- GRANT ALL PRIVILEGES ON webapp_db.* TO 'root'@'0.0.0.0'
+-- 	IDENTIFIED BY 'toor';
+GRANT ALL PRIVILEGES ON webapp_db.* TO 'flask'@'0.0.0.0'
+	IDENTIFIED BY 'flask';
 FLUSH PRIVILEGES;
 

@@ -1,29 +1,43 @@
 ---
-version: '3'
+version: '3.7'
 services:
-  web:
-    build: ./web
+  flask:
+    build:
+      context: webapp
+      dockerfile: Dockerfile
+    container_name: flask
+    restart: unless-stopped
     depends_on:
       - database
+    volumes:
+      - ./flask_app/static/uploads:/flask_app/static/uploads
     networks:
       - csec380
     environment:
       - FLASK_ENV=development
+      # - FLASK_APP=run.py
+      - APP_NAME=videoTubes
     ports:
-      - "80:5000"
+      - 80:5000
+
+      # APP_ENV: "prod"
+      # APP_DEBUG: "False"
+      # ports:
+      #   - "80:5000"
+
 
   database:
-    build: ./database
+    build:
+      context: database
+      dockerfile: Dockerfile
+    container_name: database
     restart: always
     networks:
       - csec380
-    # healthcheck:
-    #   test: "/usr/bin/mysql --user=root --password=toor --host=0.0.0.0 --execute \"USE webapp_db;\""
-    #   interval: 3s
-    #   timeout: 1s
-    #   retries: 5
     environment:
       - MYSQL_ROOT_PASSWORD=toor
+      - MYSQL_USER=flask
+      - MYSQL_PASSWORD=flask
       - MYSQL_DATABASE=webapp_db
       - innodb_log_buffer_size=32M
       - innodb_log_file_size=2047M
