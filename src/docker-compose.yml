@@ -9,8 +9,8 @@ services:
     restart: unless-stopped
     depends_on:
       - database
-    # volumes:
-    #   - ./webapp/static/uploads:/webapp/static/uploads
+    volumes:
+      - ./webapp/static/uploads:/webapp/static/uploads:z
     networks:
       - csec380
     environment:

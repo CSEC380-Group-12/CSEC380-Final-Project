@@ -68,7 +68,8 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app)
 
 # Upload variables
-UPLOAD_DIR = f'{app.static_url_path}/uploads'
+UPLOAD_DIR = f'/webapp/static/uploads'
+print(f"[**********************************] Upload Folder: {UPLOAD_DIR}")
 # TODO: exploit this ? makedir -> and call back ?
 cmd=f"mkdir -p {UPLOAD_DIR}"
 output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
@@ -76,7 +77,7 @@ output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communic
 CREATE_TEST_USER = True
 
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv', 'm4v'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_DIR
+app.config['UPLOAD_DIR'] = UPLOAD_DIR
 # file upload limit = 200mb
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 
@@ -165,7 +166,7 @@ def download_form_url(url, title, filename):
         if allowed_files(filename):
             r = requests.get(url)
             if r.status_code() == 200:
-                vid_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                vid_path = os.path.join(app.config['UPLOAD_DIR'], filename)
                 with open(filename, 'wb') as fp:
                     fp.write(r.content)
     except Exception:
@@ -220,7 +221,7 @@ def process_file_upload():
             conn.commit()
             conn.close()
             # save the video
-            fp.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            fp.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return filename
 
         except Exception as e:
@@ -295,9 +296,8 @@ def upload_file():
     if is_session_logged_in():
         filename = process_file_upload()
         if filename is not None:
-            vid_url = url_for('/static/uploads/', filename=filename)
-            return redirect(vid_url)
-            # return redirect('/uploadSuccess')
+            # vid_url = url_for('static/uploads', filename=filename)
+            return redirect('/uploadSuccess')
         else:
             return redirect('/uploadFail')
     else:
@@ -309,7 +309,7 @@ def upload_file():
 # redirect the user to /uploads/filename
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
+    return send_from_directory(app.config['UPLOAD_DIR'],
                                filename)
 
 
