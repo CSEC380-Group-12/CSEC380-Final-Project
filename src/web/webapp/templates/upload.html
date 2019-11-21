@@ -8,7 +8,7 @@
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 	</head>
 
-			<p>
+			<!--
 			{% with messages = get_flashed_messages() %}
 				{% if messages %}
 					<ul class=flashes>
@@ -18,7 +18,7 @@
 					</ul>
 				{% endif %}
 			{% endwith %}
-		</p>
+		-->
 	<body>
 
 		<div id="container">
@@ -28,25 +28,41 @@
 				</form>
 				
 				<form action="/logout" method="GET">
-					<button class="LOGOUT">LOG OUT</button>
+					<button class="LGOUT">LOG OUT</button>
 				</form>
 			</div>
 			
 			<div id="quarter2">
+                <form action="/upload" method="GET" enctype="multipart/form-data">
+					<ul style="list-style-type: none;">
+                        <dl>
+							<label for="vidPath" class="vidText">URL TO VIDEO:</label>
+							<input class="inputText" type="text" name="urlToVid" autocomplete="off" required>
+						</dl>
+						<li>
+							<label for="vidName" class="vidText">VIDEO TITLE:</label>
+							<input class="inputText" type="text" name="vidName">
+			  			</li>
+
+                     </ul>
+					<button class="UP">UPLOAD</button>
+                </form>
+				<hr size="10">
 				<form action="/upload" method="POST" enctype="multipart/form-data">
 					<ul style="list-style-type: none;">
 						<dl>
-							<label for="vidPath" class="vidText">URL OR FILEPATH TO VIDEO:</label>
-							<input type="file" name="file" autocomplete="off" required>
+							<input class="inputBox" type="file" name="FileName">
 						</dl>
-						
+
+
 						<li>
 							<label for="vidName" class="vidText">VIDEO TITLE:</label>
-							<input type="text" name="vidName">
+							<input class="inputText" type="text" name="vidName">
 						</li>
 
-						<button class="UP">UPLOAD</button>
 					</ul>
+					<button class="UP">UPLOAD</button>
+
 				</form>		  
 			</div>
 			
