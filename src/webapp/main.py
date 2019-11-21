@@ -18,6 +18,8 @@ import hashlib
 import secrets
 from werkzeug.utils import secure_filename
 from threading import Thread
+import urllib.parse as urlparse
+import requests
 
 # wait for database container to load before flask
 def database_checker():
@@ -73,7 +75,7 @@ output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communic
 
 CREATE_TEST_USER = True
 
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv'}
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv', 'm4v'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_DIR
 # file upload limit = 200mb
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
@@ -157,20 +159,56 @@ def allowed_files(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def download_form_url(url, title, filename):
+    # parts = urlparse(url)
+    try:
+        if allowed_files(filename):
+            r = requests.get(url)
+            if r.status_code() == 200:
+                vid_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                with open(filename, 'wb') as fp:
+                    fp.write(r.content)
+    except Exception:
+        flash("Failed to download file")
+    try:
+        # add video metadata to the database
+        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+        cursor = conn.cursor()
+        userID = session['uid']
+        query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+        cursor.execute(query)
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return filename
+
+    except Exception as e:
+        print(e, flush=True)
+        return None
+
+
+
 def process_file_upload():
+    # if its a url
+    # TODO: exploit ? https://gist.github.com/fedir/5883651
+    url = request.form.get('file.URL', '')
+    parts = urlparse.urlsplit(url)
     title = request.form.get('vidTitle', '')
-    # check if the post if the post request contains a file
+    if parts.scheme in {'http', 'https'}:
+        return download_form_url(url, title, parts.path[1:])
+
+    # check if the post request contains a file
     if 'file' not in request.files:
         print('no file selected', flush=True)
         return None
+
     fp = request.files['file']
-    filename = secure_filename(fp.filename)  # generate a secure name
     # check file name length
     if fp.filename == '' or title == '':
             print(f'no file name\nfp.fileName{fp.filename}, title: {title}', flush=True)
             return None
-    elif fp and allowed_files(fp.filename):
-
+    filename = secure_filename(fp.filename)  # generate a secure name
+    if fp and allowed_files(fp.filename):
         try:
             # add video metadata to the database
             conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
@@ -257,7 +295,8 @@ def upload_file():
     if is_session_logged_in():
         filename = process_file_upload()
         if filename is not None:
-            return redirect(url_for('static/uploads/', filename=filename))
+            vid_url = url_for('/static/uploads/', filename=filename)
+            return redirect(vid_url)
             # return redirect('/uploadSuccess')
         else:
             return redirect('/uploadFail')
