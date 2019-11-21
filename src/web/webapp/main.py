@@ -1,26 +1,28 @@
-# imports
+# Flask imports
 import flask
 from flask import Flask, render_template, redirect, url_for, request, abort, session, send_from_directory, flash
-from common import *
-import pymysql
-import sys
-import os
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_cors import CORS, cross_origin
+from common import *  # database creds
+import pymysql  # for the MariDB container
+import sys
+import os
+import datetime
+import subprocess
+import time
+# hashing and encrypting
 import hashlib
-from common import *
 import secrets
 from werkzeug.utils import secure_filename
 
+
 # flask init
-CREATE_TEST_USER = True
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='/static', template_folder='templates')
 
 # flask session init
 app.secret_key = secrets.token_bytes(64)
-app.config['SESSION_TYPE'] = 'filesystem'
 
 # rate limit for password brute force
 limiter = Limiter(
@@ -32,6 +34,17 @@ limiter = Limiter(
 # configure CORS
 app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app)
+
+# Upload variables
+UPLOAD_DIR = '/videos'
+# TODO: exploit this ? makedir -> and call back ?
+cmd=f"mkdir -p {UPLOAD_DIR}"
+output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
+
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_DIR
+# file upload limit = 200mb
+app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 
 
 # Checks if the current session is logged in.
@@ -87,7 +100,6 @@ def process_logout_request():
 
 def create_test_users():
     # Add a test user
-
     conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
     cursor = conn.cursor()
     testuser1 = 'admin2'
@@ -100,14 +112,27 @@ def create_test_users():
     cursor.execute(query, data)
     print("here", file=sys.stderr)
     for (userID, password_hash) in cursor:
-        if password_hash == test_hash:
-            return
-        else:
+        if password_hash != test_hash:
             cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
 
     cursor.close()
     conn.commit()
     conn.close()
+
+
+def process_file_upload(title, filename):
+    try:
+        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+        cursor = conn.cursor()
+        userID = session['uid']
+        query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+        cursor.execute(query)
+        cursor.close()
+        conn.commit()
+        conn.close()
+        return True
+    except Exception:
+        return False
 
 
 @app.route('/')
@@ -121,11 +146,8 @@ def route_index():
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("14400/day;600/hour;10/minute")
 def route_login():
-    if CREATE_TEST_USER:
-        create_test_users()
-
     if request.method == 'GET':
-        return redirect('http://localhost:5000')
+        return redirect('/')
 
     username = request.form['username']
     password = request.form['password']
@@ -152,13 +174,16 @@ def route_upload():
 
 
 def allowed_files(filename):
-    allowed_extensions = {'mp4', 'txt'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
+        print("################# REQUEST")
+        print(request)
+        print("################# REQUEST_DATA")
+        print(request.data)
         # check if the post if the post request contains a file
         if 'file' not in request.files:
             flash('no file selected')
@@ -172,11 +197,27 @@ def upload_file():
             filename = secure_filename(file.filename)
             # TODO: save file to db
             flash('File successfully uploaded')
-            return redirect('/uploadSuccess')
+            title = 'null'
+            if process_file_upload(title, filename):
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                return redirect('/uploadSuccess')
+                # TODO: maybe
+                # return redirect(url_for('uploaded_file',
+                #                         filename=filename))
+            else:
+                return redirect('/uploadFail')
         else:
             return redirect('/uploadFail')
     else:
         return render_template("/upload")
+
+# serving of the uploaded files
+# redirect the user to /uploads/filename
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename)
+
 
 @app.route('/uploadSuccess', methods=['POST', 'GET'])
 def route_upload_success():
@@ -237,5 +278,8 @@ def route_LandingCSS():
 def route_UploadCSS():
     return app.send_static_file('UploadCSS.css')
 
+
+
+create_test_users()
 # vim:tabstop=4
 # vim:shiftwidth=4

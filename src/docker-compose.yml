@@ -14,12 +14,20 @@ services:
 
   database:
     build: ./database
-    command: --max-allowed-packet=64MB
+    restart: always
     networks:
       - csec380
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=toor --execute \"USE webapp_db;\""
+      interval: 3s
+      timeout: 1s
+      retries: 5
     environment:
       - MYSQL_ROOT_PASSWORD=toor
       - MYSQL_DATABASE=webapp_db
+      - innodb_log_buffer_size=32M
+      - innodb_log_file_size=2047M
+      - max_allowed_packet=256M
 
 networks:
   csec380:
