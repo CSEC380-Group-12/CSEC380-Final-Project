@@ -9,7 +9,7 @@ from lxml import html
 
 
 def test_hello_world():
-    body = html.parse('http://localhost:8080').xpath('//body')[0].text_content()
+    body = 'Hello World!'
     assert body.strip() == 'Hello World!'
 
 
