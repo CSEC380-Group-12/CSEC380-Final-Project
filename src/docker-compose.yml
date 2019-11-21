@@ -9,21 +9,15 @@ services:
     restart: unless-stopped
     depends_on:
       - database
-    volumes:
-      - ./flask_app/static/uploads:/flask_app/static/uploads
+    # volumes:
+    #   - ./webapp/static/uploads:/webapp/static/uploads
     networks:
       - csec380
     environment:
       - FLASK_ENV=development
-      # - FLASK_APP=run.py
       - APP_NAME=videoTubes
     ports:
       - 80:5000
-
-      # APP_ENV: "prod"
-      # APP_DEBUG: "False"
-      # ports:
-      #   - "80:5000"
 
 
   database:

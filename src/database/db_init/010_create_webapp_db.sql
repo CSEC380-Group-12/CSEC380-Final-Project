@@ -16,8 +16,8 @@ CREATE TABLE videos (
 	vidID	INTEGER PRIMARY KEY AUTO_INCREMENT,
 	userID	INTEGER NOT NULL,
 	videoTitle	VARCHAR(248),
-	fileName    VARCHAR(248) NOT NULL UNIQUE,
-	videoURL	VARCHAR(248),  # NOT NULL UNIQUE,
+	filename VARCHAR(248) NOT NULL UNIQUE,
+	videoURL VARCHAR(248) NULL,
 	upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT videos_uploader_fk FOREIGN KEY (userID)
 		REFERENCES accounts(userID)
@@ -26,9 +26,10 @@ CREATE TABLE videos (
 );
 
 
--- GRANT ALL PRIVILEGES ON webapp_db.* TO 'root'@'0.0.0.0'
--- 	IDENTIFIED BY 'toor';
-GRANT ALL PRIVILEGES ON webapp_db.* TO 'flask'@'0.0.0.0'
+GRANT ALL PRIVILEGES ON webapp_db.* TO 'root'@'%'
+	IDENTIFIED BY 'toor';
+GRANT ALL PRIVILEGES ON webapp_db.* TO 'flask'@'%'
 	IDENTIFIED BY 'flask';
+
 FLUSH PRIVILEGES;
 

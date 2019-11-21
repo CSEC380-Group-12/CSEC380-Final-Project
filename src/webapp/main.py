@@ -18,7 +18,34 @@ import hashlib
 import secrets
 from werkzeug.utils import secure_filename
 from threading import Thread
-# TODO: new merge broke upload check why
+
+# wait for database container to load before flask
+def database_checker():
+    while True:
+        try:
+            conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+            with conn.cursor() as cursor:
+                query = f"SELECT userID FROM accounts WHERE username = 'brendy';"
+                cursor.execute(query)
+                conn.commit()
+                uid = cursor.fetchone()[0]
+                conn.close()
+                if int(uid) == 3:
+                    print("[*] Done!")
+                    return
+        except:
+            print("[*] Waiting for database ...", flush=True)
+            time.sleep(10)
+            continue
+
+q = Queue()
+t = Thread(target=database_checker)
+t.start()
+q.join()
+q.put(None)
+t.join()
+##### Database loaded ....
+
 # flask init
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='/static', template_folder='templates')
@@ -115,7 +142,6 @@ def create_test_users():
     query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{testuser1}'"
     conn.commit()
     cursor.execute(query)
-    print("here", file=sys.stderr)
     cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
     print(f"added test user: {testuser1}")
     cursor.close()
@@ -126,72 +152,44 @@ def create_test_users():
     CREATE_TEST_USER = False
 
 
-def database_checker():
-    while True:
-        try:
-            conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-            with conn.cursor() as cursor:
-                query = f"SELECT userID FROM accounts WHERE username = 'brendy';"
-                cursor.execute(query)
-                conn.commit()
-                uid = cursor.fetchone()
-                conn.close()
-                print(f"ID of brendy:{uid}", flush=True)
-                if int(uid) == 2:
-                    return
-        except:
-            print("still waiting", flush=True)
-            time.sleep(10)
-            continue
-
-
 
 def allowed_files(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def video_checker():
-    print(f"The form:\n{request.form}")
-    for key in request.form:
-        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", flush=True)
-        print("key: {0}, value: {1}".format(key, request.form[key]), flush=True)
-        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", flush=True)
-
+def process_file_upload():
+    title = request.form.get('vidTitle', '')
     # check if the post if the post request contains a file
     if 'file' not in request.files:
         print('no file selected', flush=True)
-        return False
-    # check file name length
-    elif len(file.filename) < 1:
-            print('no file name', flush=True)
-            return False
-    elif file and allowed_files(file.filename):
-        return True
-    
-
-def process_file_upload():
-    title = request.form.get('vidName', '')
-    video = request.files['file']
-    filename = secure_filename(video.filename) # generate a secure name
-
-    try:
-        # add video metadata to the database
-        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-        cursor = conn.cursor()
-        userID = session['uid']
-        query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
-        cursor.execute(query)
-        cursor.close()
-        conn.commit()
-        conn.close()
-        # save the video
-        video.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-    except Exception as e:
-        print(e, flush=True)
         return None
+    fp = request.files['file']
+    filename = secure_filename(fp.filename)  # generate a secure name
+    # check file name length
+    if fp.filename == '' or title == '':
+            print(f'no file name\nfp.fileName{fp.filename}, title: {title}', flush=True)
+            return None
+    elif fp and allowed_files(fp.filename):
 
-    return filename
+        try:
+            # add video metadata to the database
+            conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+            cursor = conn.cursor()
+            userID = session['uid']
+            query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+            cursor.execute(query)
+            cursor.close()
+            conn.commit()
+            conn.close()
+            # save the video
+            fp.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return filename
+
+        except Exception as e:
+            print(e, flush=True)
+            return None
+    return None
+
 
 
 
@@ -239,10 +237,11 @@ def route_invalid_login():
 
 @app.route('/logout', methods=['GET', 'POST'])
 def route_logout():
-    if process_logout_request():
-        return redirect('/')
-    else:
-        redirect('/login')
+    if is_session_logged_in():
+        if process_logout_request():
+            return redirect('/')
+    
+    redirect('/login')
 
 
 @app.route('/upload', methods=['GET'])
@@ -256,15 +255,14 @@ def route_upload():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if is_session_logged_in():
-        if video_checker():
-            filename = process_file_upload()
-            if filename is not None:
-                return redirect(url_for('static/uploads', filename=filename))
-                # return redirect('/uploadSuccess')
-            else:
-                return redirect('/uploadFail')
+        filename = process_file_upload()
+        if filename is not None:
+            return redirect(url_for('static/uploads/', filename=filename))
+            # return redirect('/uploadSuccess')
         else:
             return redirect('/uploadFail')
+    else:
+        return redirect('/login')
     return redirect('/upload')
 
 
@@ -320,14 +318,6 @@ def route_UploadCSS():
     return app.send_static_file('CSS/UploadCSS.css')
 
 
-if __name__ == '__main__':
-    # q = Queue()
-    # t = Thread(target=database_checker)
-    # t.start()
-    app.run(host='0.0.0.0')
-    # q.join()
-    # q.put(None)
-    # t.join()views
 
 # vim:tabstop=4
 # vim:shiftwidth=4
