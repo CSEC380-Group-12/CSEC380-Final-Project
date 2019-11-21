@@ -4,9 +4,6 @@
 # FROM tiangolo/uwsgi-nginx-flask:python3.6-alpine3.7
 FROM python:3.7.2-stretch
 
-# Install the dependencies
-RUN pip3 install -r requirements.txt
-
 # The WORKDIR directive defines the working directory for the container.
 WORKDIR /webapp
 
@@ -18,6 +15,9 @@ ADD . /webapp
 # ENV STATIC_URL /static
 # ENV STATIC_PATH /webapp/static
 
+
+# Install the dependencies
+RUN pip3 install -r /webapp/requirements.txt
 
 # # Install image preview generator tools
 # RUN apk add --no-cache file
