@@ -236,7 +236,7 @@ def process_file_upload():
 def route_index():  
     # app_name = os.getenv("APP_NAME")  
     if is_session_logged_in():
-        return render_template('index.html')
+        return render_template('home.html')
     else:
         return render_template('login.html')
 
