@@ -17,7 +17,7 @@ ADD . /webapp
 # ENV STATIC_PATH /webapp/static
 
 # Install the dependencies
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r /webapp/requirements.txt
 
 # # Install image preview generator tools
 # RUN apk add --no-cache file
