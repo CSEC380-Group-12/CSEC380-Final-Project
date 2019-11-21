@@ -17,7 +17,7 @@ ADD . /webapp
 
 
 # Install the dependencies
-RUN pip3 install -r /webapp/requirements.txt
+RUN pip3 install -r requirements.txt
 
 # # Install image preview generator tools
 # RUN apk add --no-cache file
