@@ -267,7 +267,8 @@ def route_index():
             final_list.append(str(i[0]))
             final_list.append(str(i[1]))
             final_list.append(str(i[2]))
-        return render_template('home.html', my_list=final_list)
+        example = ["Jinja works!"]
+        return render_template('home.html', my_list=final_list, test_list=example)
     else:
         return render_template('login.html')
 
