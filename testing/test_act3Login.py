@@ -17,7 +17,7 @@ def test_valid_login():
     req = requests.post(f"{HOST}/login", creds)
     
     assert req.status_code == 200
-    assert req.url == f"{HOST}"
+    assert req.url == f"{HOST}/"
 
 
 def test_invalid_login():
