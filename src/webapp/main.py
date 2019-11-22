@@ -265,7 +265,13 @@ def route_index():
             print(e, flush=True)
         finally:
             conn.close()
-        return render_template('home.html', my_list=video_list)
+        final_list = []
+        for i in video_list:
+            j = i.split()
+            for x in j:
+                final_list.append(x)
+        print(video_list)
+        return render_template('home.html', my_list=final_list)
     else:
         return render_template('login.html')
 
