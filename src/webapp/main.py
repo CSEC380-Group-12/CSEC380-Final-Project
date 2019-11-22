@@ -264,9 +264,9 @@ def route_index():
             conn.close()
         final_list = []
         for i in video_list:  #Splits up the requested data into individual components
-            final_list.append(i[0])
-            final_list.append(i[1])
-            final_list.append(i[2])
+            final_list.append(str(i[0]))
+            final_list.append(str(i[1]))
+            final_list.append(str(i[2]))
         return render_template('home.html', my_list=final_list)
     else:
         return render_template('login.html')
