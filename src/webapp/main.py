@@ -69,7 +69,6 @@ cors = CORS(app)
 
 # Upload variables
 UPLOAD_DIR = f'/webapp/static/uploads'
-print(f"[**********************************] Upload Folder: {UPLOAD_DIR}")
 # TODO: exploit this ? makedir -> and call back ?
 cmd=f"mkdir -p {UPLOAD_DIR}"
 output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
@@ -159,6 +158,21 @@ def create_test_users():
 def allowed_files(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# def get_videos():
+#     conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+#     try:
+#         with conn.cursor() as cursor:
+#             # Read a single record
+#             sql = "SELECT `id`, `password` FROM `users` WHERE `email`=%s"
+#             cursor.execute(sql, ('webmaster@python.org',))
+#             result = cursor.fetchone()
+#             print(result)
+#     finally:
+#         conn.close()
+
+
+def file_check(filename):
+    return os.path.isfile(os.path.join(app.config['UPLOAD_DIR'], filename))
 
 def download_form_url(url, title, filename):
     # parts = urlparse(url)
@@ -167,7 +181,7 @@ def download_form_url(url, title, filename):
             r = requests.get(url)
             if r.status_code() == 200:
                 vid_path = os.path.join(app.config['UPLOAD_DIR'], filename)
-                with open(filename, 'wb') as fp:
+                with open(vid_path, 'wb') as fp:
                     fp.write(r.content)
     except Exception:
         flash("Failed to download file")
@@ -282,6 +296,13 @@ def route_logout():
     
     redirect('/login')
 
+# route to play videos
+@app.route('/uploads/<filename>')
+def route_uploaded_file(filename):
+    if not is_session_logged_in():
+        return redirect('/login')
+
+    return send_from_directory(app.config['UPLOAD_DIR'], filename)
 
 @app.route('/upload', methods=['GET'])
 def route_upload():
@@ -296,10 +317,16 @@ def upload_file():
     if is_session_logged_in():
         filename = process_file_upload()
         if filename is not None:
-            # vid_url = url_for('static/uploads', filename=filename)
-            return redirect('/uploadSuccess')
+            vid_url = url_for('static', filename=f"uploads/{filename}")
+            flash("Video uploaded successfully")
+            flash("Redirecting to Video..")
+            
+            flash("url for video:")
+            flash(f"http://0.0.0.0{vid_url}")
+            # return redirect(vid_url)
         else:
-            return redirect('/uploadFail')
+            flash(u"Video failed to upload", 'error')
+            # return redirect('/uploadFail')
     else:
         return redirect('/login')
     return redirect('/upload')
