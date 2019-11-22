@@ -2,22 +2,34 @@ DROP DATABASE IF EXISTS webapp_db;
 CREATE DATABASE webapp_db;
 USE webapp_db;
 
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS videos;
+
 CREATE TABLE accounts (
-	uid		INTEGER PRIMARY KEY,
-	username	TINYTEXT NOT NULL UNIQUE,
-	password	CHAR(128)
-);
+	userID	INTEGER PRIMARY KEY AUTO_INCREMENT,
+	username VARCHAR(248) NOT NULL UNIQUE,
+	pass_hash VARCHAR(248) NOT NULL,
+	TotalVideoCount INTEGER NOT NULL DEFAULT 0,
+	ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 
 CREATE TABLE videos (
-	id		INTEGER PRIMARY KEY,
-	uploader	INTEGER NOT NULL,
-	display_name	TINYTEXT,
-	video_file	TEXT NOT NULL UNIQUE,
-	CONSTRAINT videos_uploader_fk FOREIGN KEY (uploader)
-		REFERENCES accounts(uid)
+	vidID	INTEGER PRIMARY KEY AUTO_INCREMENT,
+	userID	INTEGER NOT NULL,
+	videoTitle	VARCHAR(248),
+	filename VARCHAR(248) NOT NULL UNIQUE,
+	videoURL VARCHAR(248) NULL,
+	upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT videos_uploader_fk FOREIGN KEY (userID)
+		REFERENCES accounts(userID)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
 );
 
-GRANT ALL PRIVILEGES ON webapp_db.* TO 'sanders'@'%'
-	IDENTIFIED BY 'One day, Ihaq will rise again!';
+
+GRANT ALL PRIVILEGES ON webapp_db.* TO 'root'@'%'
+	IDENTIFIED BY 'toor';
+GRANT ALL PRIVILEGES ON webapp_db.* TO 'flask'@'%'
+	IDENTIFIED BY 'flask';
+
 FLUSH PRIVILEGES;
 

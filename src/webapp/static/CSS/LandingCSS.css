@@ -1,0 +1,57 @@
+#container{
+  display:flex;
+  height:100vh;
+}
+
+#quarter{
+  background-color:gainsboro;
+  height:100%;
+  width:250px;
+}
+
+#remainder{
+  background-color:white;
+  height:100%;
+  flex-grow:1;
+}
+
+.UP {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #0398fc;
+  color: white;
+  font-size: 220%;
+  border-radius: 20px;
+  border:2px grey; 
+  margin: 40px;
+}
+
+.DLT {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #f54747;
+  color: white;
+  font-size: 220%;
+  border-radius: 20px;
+  
+  border:2px grey;
+  margin: 40px;
+}
+
+.LGOUT {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #2b2929;
+  color: white;
+  font-size: 220%;
+  word-spacing: -8px;
+  border-radius: 20px;
+  border:2px grey; 
+  margin: 40px;
+}

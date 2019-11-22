@@ -1,0 +1,8 @@
+flask
+Wand
+pymysql
+flask_limiter
+flask_cors
+requests
+lxml
+jinja2
