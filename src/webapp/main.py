@@ -1,6 +1,5 @@
 # Flask imports
 from queue import Queue
-
 import flask
 from flask import Flask, render_template, redirect, url_for, request, abort, session, send_from_directory, flash
 from flask_limiter import Limiter
@@ -46,6 +45,7 @@ t.start()
 q.join()
 q.put(None)
 t.join()
+
 ##### Database loaded ....
 
 # flask init
@@ -67,13 +67,12 @@ limiter = Limiter(
 app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app)
 
+
 # Upload variables
 UPLOAD_DIR = f'/webapp/static/uploads'
 # TODO: exploit this ? makedir -> and call back ?
 cmd=f"mkdir -p {UPLOAD_DIR}"
 output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
-
-CREATE_TEST_USER = True
 
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv', 'm4v'}
 app.config['UPLOAD_DIR'] = UPLOAD_DIR
@@ -132,32 +131,32 @@ def process_logout_request():
     flash('You were logged out.')
     return True
 
-def create_test_users():
-    # Add a test user
-    conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-    cursor = conn.cursor()
-    testuser1 = 'admin'
-    password = 'admin'
-    hash_object = hashlib.md5(password.encode())
-    test_hash = hash_object.hexdigest()
+# # creates the user admin:admin
+# def create_test_users():
+#     # Add a test user
+#     conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+#     cursor = conn.cursor()
+#     testuser1 = 'admin'
+#     password = 'admin'
+#     hash_object = hashlib.md5(password.encode())
+#     test_hash = hash_object.hexdigest()
 
-    query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{testuser1}'"
-    conn.commit()
-    cursor.execute(query)
-    cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
-    print(f"added test user: {testuser1}")
-    cursor.close()
-    conn.commit()
-    conn.close()
+#     query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{testuser1}'"
+#     conn.commit()
+#     cursor.execute(query)
+#     cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
+#     print(f"added test user: {testuser1}")
+#     cursor.close()
+#     conn.commit()
+#     conn.close()
+# ## Create the user admin:admin
+# create_test_users()
 
-    global CREATE_TEST_USER
-    CREATE_TEST_USER = False
-
-
-
+# allowed extentions
 def allowed_files(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# TODO: retrive videos
 # def get_videos():
 #     conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
 #     try:
@@ -170,27 +169,41 @@ def allowed_files(filename):
 #     finally:
 #         conn.close()
 
-
+# check if a file exists (TODO: not used yet)
 def file_check(filename):
     return os.path.isfile(os.path.join(app.config['UPLOAD_DIR'], filename))
 
+# download a video form a given url
 def download_form_url(url, title, filename):
-    # parts = urlparse(url)
+    downloaded = False
+    if not allowed_files(filename):
+        return None
+    
+    r = requests.get(url, stream=True)
+    path = os.path.join(app.config['UPLOAD_DIR'], filename)
+    print(f"Got the request {r}", flush=True)
+    print(f"R status code: {r.status_code}", flush=True)
+    print(f"path to save the file: {path}", flush=True)
     try:
-        if allowed_files(filename):
-            r = requests.get(url)
-            if r.status_code() == 200:
-                vid_path = os.path.join(app.config['UPLOAD_DIR'], filename)
-                with open(vid_path, 'wb') as fp:
-                    fp.write(r.content)
-    except Exception:
-        flash("Failed to download file")
+        if r.status_code == 200:
+            with open(path, "wb") as fp:
+                for chunk in r.iter_content(chunk_size = 1024*1024):
+                    if chunk:
+                        fp.write(chunk)
+            downloaded = True
+        else:
+            flash(f"Video url return with status code {r.status_code()}", 'error')
+    except Exception as e:
+        flash("Failed to download file", 'error')
+        flash(f"error: {e}", 'error')
+    if not downloaded:
+        return None
     try:
         # add video metadata to the database
         conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
         cursor = conn.cursor()
         userID = session['uid']
-        query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+        query = f"INSERT INTO videos(userID, videoTitle, fileName, username) VALUES ('{userID}', '{title}', '{filename}', '{session.get('username')}')"
         cursor.execute(query)
         cursor.close()
         conn.commit()
@@ -198,11 +211,9 @@ def download_form_url(url, title, filename):
         return filename
 
     except Exception as e:
-        print(e, flush=True)
         return None
 
-
-
+# processes a file upload request. 
 def process_file_upload():
     # if its a url
     # TODO: exploit ? https://gist.github.com/fedir/5883651
@@ -210,7 +221,8 @@ def process_file_upload():
     parts = urlparse.urlsplit(url)
     title = request.form.get('vidTitle', '')
     if parts.scheme in {'http', 'https'}:
-        return download_form_url(url, title, parts.path[1:])
+        filename = parts.path.split('/')[-1]
+        return download_form_url(url, title, filename)
 
     # check if the post request contains a file
     if 'file' not in request.files:
@@ -229,7 +241,7 @@ def process_file_upload():
             conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
             cursor = conn.cursor()
             userID = session['uid']
-            query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+            query = f"INSERT INTO videos(userID, videoTitle, fileName, username) VALUES ('{userID}', '{title}', '{filename}', '{session.get('username')}')"
             cursor.execute(query)
             cursor.close()
             conn.commit()
@@ -244,11 +256,8 @@ def process_file_upload():
     return None
 
 
-
-
 @app.route('/')
 def route_index():  
-    # app_name = os.getenv("APP_NAME")  
     if is_session_logged_in():
         return render_template('home.html')
     else:
@@ -271,9 +280,6 @@ def route_login():
 
     username = request.form['username']
     password = request.form['password']
-    if username == "admin2" and CREATE_TEST_USER:
-        create_test_users()
-        return redirect("/login")
 
     if process_login_request(username, password) is True:
         return redirect('/')
@@ -301,8 +307,37 @@ def route_logout():
 def route_uploaded_file(filename):
     if not is_session_logged_in():
         return redirect('/login')
-
+    
+    get_video(filename)
     return send_from_directory(app.config['UPLOAD_DIR'], filename)
+
+
+def get_video(filename):
+    conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+    try:
+        with conn.cursor() as cursor:
+            sql = "SELECT * FROM `videos` WHERE `filename`=%s"
+            print(f'filename: {filename}', flush='true')
+            cursor.execute(sql, (filename,))
+            result = cursor.fetchone()
+            print(result, flush='true')
+            return result
+    finally:
+        conn.close()
+
+
+# route to play videos
+@app.route('/videoPlayer/<filename>')
+def route_video_player(filename):
+    if not is_session_logged_in():
+        return redirect('/login')
+
+    vid = get_video(filename)
+
+    return render_template('videoPlayer.html', username=session.get('username'))
+    # return send_from_directory(app.config['UPLOAD_DIR'], filename)
+
+
 
 @app.route('/upload', methods=['GET'])
 def route_upload():
