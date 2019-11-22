@@ -254,7 +254,7 @@ def route_index():
         video_list = []
         try:
             with conn.cursor() as cursor:
-                query = "SELECT videoURL, videoTitle, userID FROM videos"
+                query = "SELECT videoURL, videoTitle FROM videos"
                 cursor.execute(query)
                 video_list = cursor.fetchall()
                 cursor.close()
@@ -266,7 +266,6 @@ def route_index():
         for i in video_list:  #Splits up the requested data into individual components
             final_list.append(str(i[0]))
             final_list.append(str(i[1]))
-            final_list.append(str(i[2]))
         example = ["Jinja works!"]
         return render_template('home.html', my_list=final_list, test_list=example)
     else:
