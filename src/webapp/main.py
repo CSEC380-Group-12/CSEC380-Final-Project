@@ -250,7 +250,8 @@ def process_file_upload():
 def route_index():  
     # app_name = os.getenv("APP_NAME")  
     if is_session_logged_in():
-        return render_template('home.html')
+        example_list = ["testing the jinja list1", "testing the jinja list2", "testing the jinja list3"]
+        return render_template('home.html', my_list=example_list)
     else:
         return render_template('login.html')
 
