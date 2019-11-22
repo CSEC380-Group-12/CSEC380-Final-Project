@@ -21,16 +21,15 @@ import urllib.parse as urlparse
 import requests
 
 # a helper function that queries the database and returns the resualt
-def query_database(query, fetch=None):
-    
+def query_database(query, fetchall=None):
+    result = None
     conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
     try:
         with conn.cursor() as cursor:
             cursor.execute(query)
-            if fetch == 'fetchall':
-                pass
-            result = cursor.fetchone()
-    
+            if fetchall is None:
+                result = cursor.fetchone()
+            result = cursor.fetchall()
             return result
     finally:
         conn.close()
@@ -363,7 +362,8 @@ def upload_file():
             flash("Redirecting to Video..")
             
             flash("url for video:")
-            flash(f"http://0.0.0.0/static/uploads/{filename}"
+            #TODO: change 
+            flash(f"http://0.0.0.0/static/uploads/{filename}")
             # return redirect(vid_url)
         else:
             flash(u"Video failed to upload", 'error')
