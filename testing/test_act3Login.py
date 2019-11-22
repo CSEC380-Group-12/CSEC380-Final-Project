@@ -14,7 +14,8 @@ HOST = "http://127.0.0.1"
 def test_valid_login():
     print("[*] Testing login..")
     creds = {'username' : 'brendy', 'password' : 'flannle'}
-    req = requests.post(f"{HOST}/login".encode(encoding='utf-8', errors='strict'))
+    req = requests.post(f"{HOST}/login", creds)
+    
     assert req.status_code == 200
     assert req.url == f"{HOST}"
 
@@ -23,17 +24,17 @@ def test_invalid_login():
     print("[*] Testing invalid password..")
     creds = {'username' : 'brendy', 'password' : 'elnnalf'}
     req = requests.post(f"{HOST}/login", creds)
-    assert req.url == f"{HOST}/nvalid_login"
+    assert req.url == f"{HOST}/invalid_login"
 
     ("[*] Testing invalid username..")
     creds = {'username' : 'Pablo', 'password' : 'flannle'}
     req = requests.post(f"{HOST}/login", creds)
-    assert req.url == f"{HOST}/nvalid_login"
+    assert req.url == f"{HOST}/invalid_login"
 
-
+500
     ("[*] Testing invalid username and password..")
     creds = {'username' : 'Pablo', 'password' : 'potato'}
-    assert req.url == f"{HOST}/nvalid_login"
+    assert req.url == f"{HOST}/invalid_login"
 
 # def test_login():
 #     print("Connecting to site..")
