@@ -250,8 +250,22 @@ def process_file_upload():
 def route_index():  
     # app_name = os.getenv("APP_NAME")  
     if is_session_logged_in():
-        example_list = ["testing the jinja list1", "testing the jinja list2", "testing the jinja list3"]
-        return render_template('home.html', my_list=example_list)
+        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+        video_list = []
+        try:
+            with conn.cursor() as cursor:
+                query = "SELECT videoURL, videoTitle, userID FROM videos"
+                cursor.execute(query)
+                result = cursor.fetchone()
+                while result is not None:
+                    video_list.append(result)
+                    result = cursor.fetchone()
+                cursor.close()
+        except Exception as e:
+            print(e, flush=True)
+        finally:
+            conn.close()
+        return render_template('home.html', my_list=video_list)
     else:
         return render_template('login.html')
 
