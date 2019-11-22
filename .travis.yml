@@ -16,7 +16,6 @@ service:
 # building the docker cotainer
 before_install:
       - docker-compose -f src/docker-compose.yml up -d --build
-
 # # command to install dependencies
 # install:
 #       - pip3 install -r requirements.txt
