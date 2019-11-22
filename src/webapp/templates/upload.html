@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>video upload</title>
+		<link rel="stylesheet" href="UploadCSS.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	</head>
+
+			<!--
+			{% with messages = get_flashed_messages() %}
+				{% if messages %}
+					<ul class=flashes>
+					{% for message in messages %}
+						<li>{{ message }}</li>
+					{% endfor %}
+					</ul>
+				{% endif %}
+			{% endwith %}
+		-->
+	<body>
+
+		<div id="container">
+			<div id="quarter">
+				<form action="/returnToBrowse" method="GET">
+					<button class="RTB">RETURN TO BROWSE</button>
+				</form>
+				
+				<form action="/logout" method="GET">
+					<button class="LGOUT">LOG OUT</button>
+				</form>
+				
+			</div>
+			
+			<div id="quarter2">
+				<hr size="10">
+				<form action="/upload" method="POST" enctype='multipart/form-data'>
+					<fieldset>
+						<legend>Upload videos:</legend>
+						Video Title:<br>
+						<input id="vidTitle" class="form-control" type="text" name="vidTitle" placeholder="Enter a title for your video" required>
+						Upload video from a URL:<br>
+						<input id="file.URL" class="form-control" type="text" name="file.URL" autocomplete="off" placeholder="Enter a URL">
+						or select a local file:<br>
+						<input  id="file" class="inputBox" type="file" name="file" autocomplete="off">
+						<br>
+						<button type="submit" class="UP">UPLOAD</button>
+					</fieldset>
+				<form>
+					<fieldset>
+						{% with messages = get_flashed_messages() %}
+							{% if messages %}
+								<ul class=flashes>
+								{% for message in messages %}
+									<li>{{ message }}</li>
+								{% endfor %}
+								</ul>
+							{% endif %}
+						{% endwith %}
+					</fieldset>
+				</form>
+				</form>
+			</div>
+			
+		</div>
+		
+	</body>
+
+</html>

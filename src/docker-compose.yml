@@ -1,23 +1,42 @@
-version: '3'
+---
+version: '3.7'
 services:
-  web:
-    build: ./web
+  flask:
+    build:
+      context: webapp
+      dockerfile: Dockerfile
+    container_name: flask
+    restart: unless-stopped
     depends_on:
       - database
+    volumes:
+      - ./webapp/static/uploads:/webapp/static/uploads:z
     networks:
       - csec380
+    environment:
+      - FLASK_ENV=development
+      - APP_NAME=videoTubes
     ports:
-      - "80:5000"
-      
+      - 80:5000
+
+
   database:
-    build: ./database
-    command: --max-allowed-packet=64MB
+    build:
+      context: database
+      dockerfile: Dockerfile
+    container_name: database
+    restart: always
     networks:
       - csec380
     environment:
       - MYSQL_ROOT_PASSWORD=toor
+      - MYSQL_USER=flask
+      - MYSQL_PASSWORD=flask
       - MYSQL_DATABASE=webapp_db
+      - innodb_log_buffer_size=32M
+      - innodb_log_file_size=2047M
+      - max_allowed_packet=256M
 
 networks:
   csec380:
-      driver: bridge
+    driver: bridge

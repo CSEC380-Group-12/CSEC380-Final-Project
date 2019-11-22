@@ -1,7 +1,10 @@
 USE webapp_db;
 
  INSERT INTO accounts(username, pass_hash) VALUES
-	('root', 'toor');
+	('flask', 'flask');
+
+INSERT INTO accounts(username, pass_hash) VALUES
+	('toor', 'root');
 
 
  INSERT INTO accounts(username, pass_hash) VALUES
