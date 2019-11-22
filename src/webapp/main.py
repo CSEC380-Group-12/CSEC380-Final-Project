@@ -20,6 +20,27 @@ from threading import Thread
 import urllib.parse as urlparse
 import requests
 
+# A class to represent a Video
+class Video:
+	vidID = int()
+	userID = int()
+	videoTitle = str()
+	filename = str()
+
+	def __init__(self, vidID, userID, videoTitle, filename):
+		self.vidID = vidID
+		self.userID = userID
+		self.videoTitle = videoTitle
+		self.filename = filename
+
+	# Returns the path for this video
+	def getPath():
+		return file_check(filename)
+
+def get_username_from_id(uid):
+	# TODO
+	pass
+
 # a helper function that queries the database and returns the resualt
 def query_database(query, fetchall=None):
     result = None
@@ -217,7 +238,7 @@ def download_form_url(url, title, filename):
         conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
         cursor = conn.cursor()
         userID = session['uid']
-        query = f"INSERT INTO videos(userID, videoTitle, fileName, username) VALUES ('{userID}', '{title}', '{filename}', '{session.get('username')}')"
+        query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
         cursor.execute(query)
         cursor.close()
         conn.commit()
@@ -255,7 +276,7 @@ def process_file_upload():
             conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
             cursor = conn.cursor()
             userID = session['uid']
-            query = f"INSERT INTO videos(userID, videoTitle, fileName, username) VALUES ('{userID}', '{title}', '{filename}', '{session.get('username')}')"
+            query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
             cursor.execute(query)
             cursor.close()
             conn.commit()
