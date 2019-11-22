@@ -31,7 +31,7 @@ def test_invalid_login():
     req = requests.post(f"{HOST}/login", creds)
     assert req.url == f"{HOST}/invalid_login"
 
-500
+
     ("[*] Testing invalid username and password..")
     creds = {'username' : 'Pablo', 'password' : 'potato'}
     assert req.url == f"{HOST}/invalid_login"
