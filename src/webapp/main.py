@@ -20,6 +20,21 @@ from threading import Thread
 import urllib.parse as urlparse
 import requests
 
+# a helper function that queries the database and returns the resualt
+def query_database(query, fetch=None):
+    
+    conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            if fetch == 'fetchall':
+                pass
+            result = cursor.fetchone()
+    
+            return result
+    finally:
+        conn.close()
+
 # wait for database container to load before flask
 def database_checker():
     while True:
@@ -165,7 +180,7 @@ def allowed_files(filename):
 #             sql = "SELECT `id`, `password` FROM `users` WHERE `email`=%s"
 #             cursor.execute(sql, ('webmaster@python.org',))
 #             result = cursor.fetchone()
-#             print(result)
+#             print(resultFone)
 #     finally:
 #         conn.close()
 
@@ -255,6 +270,9 @@ def process_file_upload():
             return None
     return None
 
+def delete_video(filename):
+    pass
+    
 
 @app.route('/')
 def route_index():  
@@ -302,28 +320,16 @@ def route_logout():
     
     redirect('/login')
 
+
 # route to play videos
 @app.route('/uploads/<filename>')
 def route_uploaded_file(filename):
     if not is_session_logged_in():
         return redirect('/login')
-    
-    get_video(filename)
-    return send_from_directory(app.config['UPLOAD_DIR'], filename)
 
 
 def get_video(filename):
-    conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-    try:
-        with conn.cursor() as cursor:
-            sql = "SELECT * FROM `videos` WHERE `filename`=%s"
-            print(f'filename: {filename}', flush='true')
-            cursor.execute(sql, (filename,))
-            result = cursor.fetchone()
-            print(result, flush='true')
-            return result
-    finally:
-        conn.close()
+    return send_from_directory(app.config['UPLOAD_DIR'], filename)
 
 
 # route to play videos
@@ -357,7 +363,7 @@ def upload_file():
             flash("Redirecting to Video..")
             
             flash("url for video:")
-            flash(f"http://0.0.0.0{vid_url}")
+            flash(f"http://0.0.0.0/static/uploads/{filename}"
             # return redirect(vid_url)
         else:
             flash(u"Video failed to upload", 'error')
