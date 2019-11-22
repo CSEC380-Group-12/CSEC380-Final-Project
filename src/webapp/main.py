@@ -256,21 +256,17 @@ def route_index():
             with conn.cursor() as cursor:
                 query = "SELECT videoURL, videoTitle, userID FROM videos"
                 cursor.execute(query)
-                result = cursor.fetchone()
-                while result is not None:
-                    video_list.append(result)
-                    result = cursor.fetchone()
+                video_list = cursor.fetchall()
                 cursor.close()
         except Exception as e:
             print(e, flush=True)
         finally:
             conn.close()
         final_list = []
-        for i in video_list:
-            j = i.split()
-            for x in j:
-                final_list.append(x)
-        print(video_list)
+        for i in video_list:  #Splits up the requested data into individual components
+            final_list.append(i[0])
+            final_list.append(i[1])
+            final_list.append(i[2])
         return render_template('home.html', my_list=final_list)
     else:
         return render_template('login.html')
