@@ -8,10 +8,10 @@ Author: Bad3r
 from lxml import html
 
 
-def test_hello_world():
-    body = 'Hello World!'
-    assert body.strip() == 'Hello World!'
+# def test_hello_world():
+#     body = 'Hello World!'
+#     assert body.strip() == 'Hello World!'
 
 
-if __name__ == '__main__':
-    test_hello_world()
+# if __name__ == '__main__':
+#     test_hello_world()
