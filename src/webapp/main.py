@@ -45,10 +45,10 @@ def get_video_from_id(vidID):
 	print(result, file=sys.stderr)
 	return Video(vidID, result[0], result[1], result[2])
 
-# def get_username_from_uid(uid):
-# 	result = query_database("SELECT username FROM accounts WHERE userID = %s;"
-# 		valueTuple=(uid))
-# 	return result[0]
+def get_username_from_uid(uid):
+ 	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
+ 		valueTuple=(uid))
+ 	return result[0]
 
 # Returns a list of video objects for all the videos in the database
 def get_all_videos():
