@@ -64,11 +64,9 @@ class Video:
 		
 
 def get_video_from_id(vidID):
-	print(vidID, file=sys.stderr)
 	result = query_database(
 		"SELECT userID, videoTitle, filename FROM videos WHERE vidID = %s;",
 		valueTuple=(vidID))
-	print(result, file=sys.stderr)
 	return Video(vidID, result[0], result[1], result[2])
 
 def get_username_from_uid(uid):
@@ -386,7 +384,6 @@ def route_video_player(vidID):
 	if not is_session_logged_in():
 		return redirect('/login')
 
-	print("Getting video "+str(vidID), file=sys.stderr)
 	video = get_video_from_id(vidID)
 
 	return render_template('videoPlayer.html', 
