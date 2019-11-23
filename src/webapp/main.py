@@ -324,7 +324,7 @@ def route_index():
         videos = query_database(query, fetchall=True)
         final_list = [videos]
         #if videos is not None
-            # #for i in videos:     #Splits up the requested data into individual components
+            #for i in videos:     #Splits up the requested data into individual components
                 #final_list.append(str(i[0]))
                 #final_list.append(str(i[1]))
                 #final_list.append(str(i[2]))
