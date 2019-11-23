@@ -323,27 +323,19 @@ def delete_video(filename):
 
 @app.route('/')
 def route_index():  
-	if is_session_logged_in():
-		conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-		video_list = []
-		try:
-			with conn.cursor() as cursor:
-				query = "SELECT videoURL, videoTitle FROM videos"
-				cursor.execute(query)
-				video_list = cursor.fetchall()
-				cursor.close()
-		except Exception as e:
-			print(e, flush=True)
-		finally:
-			conn.close()
-		final_list = []
-		for i in video_list:  #Splits up the requested data into individual components
-			final_list.append(str(i[0]))
-			final_list.append(str(i[1]))
-		example = ["Jinja works!"]
-		return render_template('home.html', my_list=final_list, test_list=example)
-	else:
-		return render_template('login.html')
+    if is_session_logged_in():
+        query = "SELECT * FROM accounts"
+        videos = query_database(query, fetchall=True)
+        final_list = [videos]
+        #if videos is not None:
+            #for i in videos:     #Splits up the requested data into individual components
+                #final_list.append(str(i[0]))
+                #final_list.append(str(i[1]))
+                #final_list.append(str(i[2]))
+        example = ["Jinja works!", str(len(videos))]
+        return render_template('home.html', my_list=final_list, test_list=example)
+    else:
+        return render_template('login.html')
 
 
 @app.route('/returnToBrowse', methods=['GET', 'POST'])
