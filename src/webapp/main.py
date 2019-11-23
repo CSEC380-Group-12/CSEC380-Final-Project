@@ -482,9 +482,6 @@ def route_UploadCSS():
 	return app.send_static_file('CSS/UploadCSS.css')
 
 
-# DEBUG
-print(get_username_from_uid(3), file=sys.stderr)
-
 # vim:tabstop=4
 # vim:shiftwidth=4
 
