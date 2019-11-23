@@ -37,6 +37,32 @@ class Video:
 	def getPath(self):
 		return "/static/uploads/"+self.filename
 
+	def delete(self):
+		try:
+			uid = session['uid']
+			if self.userID != uid:
+				flash("You don't have permission to delete this vidoe")
+				print("[!] ... userID={userID}, uid={uid}")
+				return False
+			if not file_check(self.filename):
+				flash("Video does not exist", 'error')
+				print(f"[!] Video does not exist", flush=True)
+				return False
+
+		except Exception as e:
+			print(f"[!] Faild fetch file form database\n{e}", flush=True)
+			flash("Faild to delete the video", 'error')
+			return False
+
+		query_database(
+			"DELETE FROM videos WHERE vidID = %s;",
+			valueTuple=(self.vidID))
+		cmd="rm -f {UPLOAD_DIR}/"+self.filename
+		output = subprocess.Popen(
+			[cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
+		return True
+		
+
 def get_video_from_id(vidID):
 	print(vidID, file=sys.stderr)
 	result = query_database(
@@ -283,27 +309,6 @@ def process_file_upload():
 			return None
 	return None
 
-def delete_video(vidID):
-	try:
-		query = """SELECT userID, fileName from videos where vidID = %s"""
-		value = (vidID)
-		result = query_database(query, valueTuple=value)
-		userID = value[0]
-		filename = value[1]
-		uid = session.get['uid']
-		if userID != uid:
-			flash("You don't have permission to delete this vidoe")
-			print("[!] ... userID={userID}, uid={uid}")
-			return
-		if not file_check(filename):
-			flash("Video does not exist", 'error')
-			print(f"[!] Video does not exist", flush=True)
-	
-
-	except Exception as e:
-		print(f"[!] Faild fetch file form database\n{e}", flush=True)
-		flash("Faild to delete the video", 'error')
-
 
 	
 
@@ -443,10 +448,14 @@ def route_upload_fail():
 		return redirect("/login")
 
 
-@app.route('/delete', methods=['GET', 'POST'])
-def route_delete():
+@app.route('/delete/<vidID>', methods=['GET', 'POST'])
+def route_delete(vidID):
 	if is_session_logged_in():
-		return render_template('delete.html')
+		video = get_video_from_id(vidID)
+		if video.delete():
+			return redirect("/")
+		else:
+			return redirect("/videoPlayer/"+vidID)
 	else:
 		return render_template('login.html')
 
