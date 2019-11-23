@@ -323,7 +323,7 @@ def route_index():
         query = "SELECT * FROM accounts"
         videos = query_database(query, fetchall=True)
         final_list = [videos]
-        #if videos is not None
+        #if videos is not None:
             #for i in videos:     #Splits up the requested data into individual components
                 #final_list.append(str(i[0]))
                 #final_list.append(str(i[1]))
