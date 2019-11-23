@@ -281,8 +281,28 @@ def process_file_upload():
 			return None
 	return None
 
-def delete_video(filename):
-	pass
+def delete_video(vidID):
+	try:
+		query = """SELECT userID, fileName from videos where vidID = %s"""
+		value = (vidID)
+		result = query_database(query, valueTuple=value)
+		userID = value[0]
+		filename = value[1]
+		uid = session.get['uid']
+		if userID != uid:
+			flash("You don't have permission to delete this vidoe")
+			print("[!] ... userID={userID}, uid={uid}")
+			return
+		if not file_check(filename):
+			flash("Video does not exist", 'error')
+			print(f"[!] Video does not exist", flush=True)
+	
+
+	except Exception as e:
+		print(f"[!] Faild fetch file form database\n{e}", flush=True)
+		flash("Faild to delete the video", 'error')
+
+
 	
 
 @app.route('/')
