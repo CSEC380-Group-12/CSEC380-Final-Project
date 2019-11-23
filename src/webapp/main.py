@@ -37,10 +37,10 @@ class Video:
 	def getPath():
 		return file_check(filename)
 
-def get_username_from_uid(uid):
-	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
-		valueTuple=(uid))
-	return result[0]
+# def get_username_from_uid(uid):
+# 	result = query_database("SELECT username FROM accounts WHERE userID = %s;"
+# 		valueTuple=(uid))
+# 	return result[0]
 
 # a helper function that queries the database and returns the resualt
 def query_database(query, fetchall=False, valueTuple=None):
@@ -138,26 +138,25 @@ def process_login_request(username, password):
 	conn = None
 	cursor = None
 	try:
-		# Connect to the Database
-		# conn = pymysql.connect(db_host, db_user, db_passwd, db_database, charset='utf8mb4')
-		# cursor = conn.cursor()
 		hash_object = hashlib.md5(password.encode())
 		cur_hash = hash_object.hexdigest()
 		# Retrieve user data (uid, password_hash)
-		query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{username}'"
-		result = query_database(query, True)
+		query = """SELECT userID, pass_hash FROM accounts WHERE username = %s"""
+		value = (username)
+		result = query_database(query, valueTuple=value)
 		print(f"[!] result: {result}", flush=True)
 		# cursor.execute(query, data)
-		for (userID, password_hash) in result:
-			# validate password hash
-			if password_hash == cur_hash:
-				session['username'] = username
-				session['uid'] = userID
-				return True
-			return False
+		userID = result[0]
+		password_hash = result[1]
+		if password_hash == cur_hash:
+			session['username'] = username
+			session['uid'] = userID
+			return True
+		return False
 	except Exception as e:
 		# Some error occurred, so fail the login
 		print('Login Error: exception error (user ' + username + ')', file=sys.stderr)
+		print(f"exception: {e}", flush=True)
 		return False
 	finally:
 		if conn is not None:
@@ -214,9 +213,12 @@ def download_form_url(url, title, filename):
 		# conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
 		# cursor = conn.cursor()
 		userID = session['uid']
-		query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+		# query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+		query = """INSERT INTO videos(userID, videoTitle, fileName) VALUES (%s, %s, %s)"""
+		value = (userID, title, filename)
+		query_database(query, valueTuple=value)
 
-		query_database(query)
+		# query_database(query)
 
 		return filename
 
@@ -248,8 +250,12 @@ def process_file_upload():
 	if fp and allowed_files(fp.filename):
 		try:
 			userID = session['uid']
-			query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
-			query_database(query)
+			# query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+			# query_database(query)
+			query = """INSERT INTO videos(userID, videoTitle, fileName) VALUES (%s, %s, %s)"""
+			value = (userID, title, filename)
+			query_database(query, valueTuple=value)
+
 			# save the video
 			fp.save(os.path.join(app.config['UPLOAD_DIR'], filename))
 			return filename
@@ -335,7 +341,6 @@ def route_video_player(filename):
 
 	return render_template('videoPlayer.html', username=session.get('username'))
 	# return send_from_directory(app.config['UPLOAD_DIR'], filename)
-
 
 
 @app.route('/upload', methods=['GET'])
