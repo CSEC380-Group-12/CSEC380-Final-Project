@@ -11,13 +11,14 @@ import sys, requests, pytest, json
 
 HOST = "http://127.0.0.1"
 
-#a test case that logs into the application successfully
+
+# a test case that logs into the application successfully
 def test_valid_login(s):
     print("[*] Testing login..")
 
     creds = {'username' : 'brendy', 'password' : 'flannle'}
-    s.post((f"{HOST}/login", creds)
-    #logged in! cookies saved for future requests.
+    s.post(f"{HOST}/login", creds)
+    # logged in! cookies saved for future requests.
     r = s.get(f"{HOST}/")
     assert r.status_code == 200
     assert r.url == f"{HOST}/"
