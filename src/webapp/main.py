@@ -34,13 +34,23 @@ class Video:
 		self.filename = filename
 
 	# Returns the path for this video
-	def getPath():
-		return file_check(filename)
+	def getPath(self):
+		return file_check(self.filename)
 
 def get_username_from_uid(uid):
 	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
 		valueTuple=(uid))
 	return result[0]
+
+# Returns a list of video objects for all the videos in the database
+def get_all_videos():
+	results = query_database(
+		"SELECT vidID, userID, videoTitle, filename FROM videos;",
+		fetchall=True)
+	videos = []
+	for result in results:
+		videos.append(Video(result[0], result[1], result[2], result[3]))
+	return videos
 
 # a helper function that queries the database and returns the resualt
 def query_database(query, fetchall=False, valueTuple=None):
@@ -323,19 +333,16 @@ def delete_video(filename):
 
 @app.route('/')
 def route_index():  
-    if is_session_logged_in():
-        query = "SELECT * FROM accounts"
-        videos = query_database(query, fetchall=True)
-        final_list = [videos]
-        #if videos is not None:
-            #for i in videos:     #Splits up the requested data into individual components
-                #final_list.append(str(i[0]))
-                #final_list.append(str(i[1]))
-                #final_list.append(str(i[2]))
-        example = ["Jinja works!", str(len(videos))]
-        return render_template('home.html', my_list=final_list, test_list=example)
-    else:
-        return render_template('login.html')
+	if is_session_logged_in():
+		videos = get_all_videos()
+		final_list = []
+		for video in videos:
+			final_list.append(video.videoTitle)
+			print(video.videoTitle, file=sys.stderr)
+		example = ["Jinja works!", str(len(videos))]
+		return render_template('home.html', video_list=videos)
+	else:
+		return render_template('login.html')
 
 
 @app.route('/returnToBrowse', methods=['GET', 'POST'])
