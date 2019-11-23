@@ -18,16 +18,19 @@
                 <button class="UP">UPLOAD</button>
             </form>
 			
-	    <form action="/delete" method="GET">
-                <button class="DLT">DELETE</button>
-            </form>
-			
 	    <form action="/logout" method="GET">
                 <button class="LGOUT">LOG OUT</button>
             </form>
         </div>
 		
-        <div id="remainder">Content</div>
+        <div class="formBox">
+
+
+		{% for item in video_list %}
+		<li><a href="/videoPlayer/{{item.vidID}}">{{item.videoTitle}}</a></li>
+		{% endfor %}
+
+	</div>
     </div>
 
 <body>
