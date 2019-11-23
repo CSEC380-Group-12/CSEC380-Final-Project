@@ -33,3 +33,13 @@ def test_video_upload():
     data = {'file.URL' : url}
     r = s.post(f"{HOST}/upload", data=data)
     assert r.status_code == 200
+
+def test_video_playback():
+    r = s.get(f"{HOST}/uploads/woff.mp4")
+    assert r.status_code == 200
+
+def test_video_delete():
+    # TODO fix test for delete: need vid id
+    r = s.get(f"{HOST}/delete/1")
+    assert r.status_code == 200
+    # verify if the video is deleted
