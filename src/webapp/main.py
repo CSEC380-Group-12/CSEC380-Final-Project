@@ -35,18 +35,20 @@ class Video:
 
 	# Returns the path for this video
 	def getPath(self):
-		return file_check(self.filename)
+		return "/static/uploads/"+self.filename
 
 def get_video_from_id(vidID):
+	print(vidID, file=sys.stderr)
 	result = query_database(
 		"SELECT userID, videoTitle, filename FROM videos WHERE vidID = %s;",
 		valueTuple=(vidID))
+	print(result, file=sys.stderr)
 	return Video(vidID, result[0], result[1], result[2])
 
-# def get_username_from_uid(uid):
-# 	result = query_database("SELECT username FROM accounts WHERE userID = %s;"
-# 		valueTuple=(uid))
-# 	return result[0]
+def get_username_from_uid(uid):
+ 	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
+ 		valueTuple=(uid))
+ 	return result[0]
 
 # Returns a list of video objects for all the videos in the database
 def get_all_videos():
@@ -312,7 +314,6 @@ def route_index():
 		final_list = []
 		for video in videos:
 			final_list.append(video.videoTitle)
-			print(video.videoTitle, file=sys.stderr)
 		example = ["Jinja works!", str(len(videos))]
 		return render_template('home.html', video_list=videos)
 	else:
@@ -370,15 +371,22 @@ def get_video(filename):
 	return send_from_directory(app.config['UPLOAD_DIR'], filename)
 
 
+@app.route('/videoPlayer/videoPlayerCSS.css')
+def route_video_player_css():
+	return app.send_static_file('CSS/videoPlayerCSS.css')
+
 # route to play videos
-@app.route('/videoPlayer/<filename>')
-def route_video_player(filename):
+@app.route('/videoPlayer/<vidID>')
+def route_video_player(vidID):
 	if not is_session_logged_in():
 		return redirect('/login')
 
-	vid = get_video(filename)
+	print("Getting video "+str(vidID), file=sys.stderr)
+	video = get_video_from_id(vidID)
 
-	return render_template('videoPlayer.html', username=session.get('username'))
+	return render_template('videoPlayer.html', 
+		video=video,
+		uploader=get_username_from_uid(video.userID))
 	# return send_from_directory(app.config['UPLOAD_DIR'], filename)
 
 

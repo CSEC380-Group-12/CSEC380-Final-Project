@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>Col. Sander's Arsenal</title>
+		<link rel="stylesheet" href="videoPlayerCSS.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	</head>
+
+	<body>
+		<div id="container">
+			<div id="quarter">
+				<form action="/returnToBrowse" method="post">
+					<button class="RTB">RETURN TO BROWSE</button>
+				</form>
+				
+				<form action="/logout" method="post">
+					<button class="LGOUT">LOG OUT</button>
+				</form>
+			</div>
+			
+			<div id="quarter2">
+
+				
+                               	<iframe class="vid" src="{{video.getPath()}}" allowfullscreen width="720" height="480"></iframe>
+                                
+				<ul "list-style-type:none">
+					<li>
+						<p class="vidLabel">
+							Title: {{video.videoTitle}}
+						</p>
+					</li>
+					<li>
+						<p class="vidLabel">
+							Uploader: {{uploader}}
+						</p>
+					</li>
+				</ul>
+				
+			</div>
+			
+		</div>
+		
+	</body>
+
+</html>
