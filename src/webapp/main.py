@@ -35,12 +35,20 @@ class Video:
 
 	# Returns the path for this video
 	def getPath(self):
-		return file_check(self.filename)
+		return "/static/uploads/"+self.filename
+
+def get_video_from_id(vidID):
+	print(vidID, file=sys.stderr)
+	result = query_database(
+		"SELECT userID, videoTitle, filename FROM videos WHERE vidID = %s;",
+		valueTuple=(vidID))
+	print(result, file=sys.stderr)
+	return Video(vidID, result[0], result[1], result[2])
 
 def get_username_from_uid(uid):
-	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
-		valueTuple=(uid))
-	return result[0]
+ 	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
+ 		valueTuple=(uid))
+ 	return result[0]
 
 # Returns a list of video objects for all the videos in the database
 def get_all_videos():
@@ -148,26 +156,25 @@ def process_login_request(username, password):
 	conn = None
 	cursor = None
 	try:
-		# Connect to the Database
-		# conn = pymysql.connect(db_host, db_user, db_passwd, db_database, charset='utf8mb4')
-		# cursor = conn.cursor()
 		hash_object = hashlib.md5(password.encode())
 		cur_hash = hash_object.hexdigest()
 		# Retrieve user data (uid, password_hash)
-		query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{username}'"
-		result = query_database(query, True)
+		query = """SELECT userID, pass_hash FROM accounts WHERE username = %s"""
+		value = (username)
+		result = query_database(query, valueTuple=value)
 		print(f"[!] result: {result}", flush=True)
 		# cursor.execute(query, data)
-		for (userID, password_hash) in result:
-			# validate password hash
-			if password_hash == cur_hash:
-				session['username'] = username
-				session['uid'] = userID
-				return True
-			return False
+		userID = result[0]
+		password_hash = result[1]
+		if password_hash == cur_hash:
+			session['username'] = username
+			session['uid'] = userID
+			return True
+		return False
 	except Exception as e:
 		# Some error occurred, so fail the login
 		print('Login Error: exception error (user ' + username + ')', file=sys.stderr)
+		print(f"exception: {e}", flush=True)
 		return False
 	finally:
 		if conn is not None:
@@ -224,9 +231,12 @@ def download_form_url(url, title, filename):
 		# conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
 		# cursor = conn.cursor()
 		userID = session['uid']
-		query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+		# query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+		query = """INSERT INTO videos(userID, videoTitle, fileName) VALUES (%s, %s, %s)"""
+		value = (userID, title, filename)
+		query_database(query, valueTuple=value)
 
-		query_database(query)
+		# query_database(query)
 
 		return filename
 
@@ -258,8 +268,12 @@ def process_file_upload():
 	if fp and allowed_files(fp.filename):
 		try:
 			userID = session['uid']
-			query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
-			query_database(query)
+			# query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+			# query_database(query)
+			query = """INSERT INTO videos(userID, videoTitle, fileName) VALUES (%s, %s, %s)"""
+			value = (userID, title, filename)
+			query_database(query, valueTuple=value)
+
 			# save the video
 			fp.save(os.path.join(app.config['UPLOAD_DIR'], filename))
 			return filename
@@ -269,8 +283,28 @@ def process_file_upload():
 			return None
 	return None
 
-def delete_video(filename):
-	pass
+def delete_video(vidID):
+	try:
+		query = """SELECT userID, fileName from videos where vidID = %s"""
+		value = (vidID)
+		result = query_database(query, valueTuple=value)
+		userID = value[0]
+		filename = value[1]
+		uid = session.get['uid']
+		if userID != uid:
+			flash("You don't have permission to delete this vidoe")
+			print("[!] ... userID={userID}, uid={uid}")
+			return
+		if not file_check(filename):
+			flash("Video does not exist", 'error')
+			print(f"[!] Video does not exist", flush=True)
+	
+
+	except Exception as e:
+		print(f"[!] Faild fetch file form database\n{e}", flush=True)
+		flash("Faild to delete the video", 'error')
+
+
 	
 
 @app.route('/')
@@ -280,7 +314,6 @@ def route_index():
 		final_list = []
 		for video in videos:
 			final_list.append(video.videoTitle)
-			print(video.videoTitle, file=sys.stderr)
 		example = ["Jinja works!", str(len(videos))]
 		return render_template('home.html', video_list=videos)
 	else:
@@ -338,17 +371,23 @@ def get_video(filename):
 	return send_from_directory(app.config['UPLOAD_DIR'], filename)
 
 
+@app.route('/videoPlayer/videoPlayerCSS.css')
+def route_video_player_css():
+	return app.send_static_file('CSS/videoPlayerCSS.css')
+
 # route to play videos
-@app.route('/videoPlayer/<filename>')
-def route_video_player(filename):
+@app.route('/videoPlayer/<vidID>')
+def route_video_player(vidID):
 	if not is_session_logged_in():
 		return redirect('/login')
 
-	vid = get_video(filename)
+	print("Getting video "+str(vidID), file=sys.stderr)
+	video = get_video_from_id(vidID)
 
-	return render_template('videoPlayer.html', username=session.get('username'))
+	return render_template('videoPlayer.html', 
+		video=video,
+		uploader=get_username_from_uid(video.userID))
 	# return send_from_directory(app.config['UPLOAD_DIR'], filename)
-
 
 
 @app.route('/upload', methods=['GET'])
