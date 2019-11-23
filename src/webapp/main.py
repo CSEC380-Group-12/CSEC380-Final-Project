@@ -323,10 +323,11 @@ def route_index():
         query = "SELECT * FROM accounts"
         videos = query_database(query, fetchall=True)
         final_list = [videos]
-        #for i in videos:     #Splits up the requested data into individual components
-            #final_list.append(str(i[0]))
-            #final_list.append(str(i[1]))
-            #final_list.append(str(i[2]))
+        #if videos is not None
+            # #for i in videos:     #Splits up the requested data into individual components
+                #final_list.append(str(i[0]))
+                #final_list.append(str(i[1]))
+                #final_list.append(str(i[2]))
         example = ["Jinja works!", str(len(videos))]
         return render_template('home.html', my_list=final_list, test_list=example)
     else:
