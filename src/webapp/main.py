@@ -37,6 +37,12 @@ class Video:
 	def getPath(self):
 		return file_check(self.filename)
 
+def get_video_from_id(vidID):
+	result = query_database(
+		"SELECT userID, videoTitle, filename FROM videos WHERE vidID = %s;",
+		valueTuple=(vidID))
+	return Video(vidID, result[0], result[1], result[2])
+
 def get_username_from_uid(uid):
 	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
 		valueTuple=(uid))
