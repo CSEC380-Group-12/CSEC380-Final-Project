@@ -42,16 +42,22 @@ def get_username_from_id(uid):
 	pass
 
 # a helper function that queries the database and returns the resualt
-def query_database(query, fetchall=None):
+def query_database(query, fetchall=False):
+    # print(f"query: {query}")
+    # print(f"fetchall: {fetchall}")
     result = None
     conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
     try:
         with conn.cursor() as cursor:
             cursor.execute(query)
-            if fetchall is None:
+            if fetchall:
+                result = cursor.fetchall()
+            else:
                 result = cursor.fetchone()
-            result = cursor.fetchall()
             return result
+        conn.commit()
+    except Exception as e:
+        print(f"Error: {e}", flush=True)
     finally:
         conn.close()
 
@@ -59,16 +65,24 @@ def query_database(query, fetchall=None):
 def database_checker():
     while True:
         try:
-            conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-            with conn.cursor() as cursor:
-                query = f"SELECT userID FROM accounts WHERE username = 'brendy';"
-                cursor.execute(query)
-                conn.commit()
-                uid = cursor.fetchone()[0]
-                conn.close()
-                if int(uid) == 3:
-                    print("[*] Done!")
-                    return
+            query = f"SELECT userID FROM accounts WHERE username = 'brendy';"
+            result = query_database(query)
+            # print(f"result: {result}", flush=True)
+            uid = result[0]
+            # print(f"uid: {uid}", flush=True)
+            if int(uid) == 3:
+                print("[*] Database loaded!")
+                return
+            # conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+            # with conn.cursor() as cursor:
+            #     query = f"SELECT userID FROM accounts WHERE username = 'brendy';"
+            #     cursor.execute(query)
+            #     conn.commit()
+            #     uid = cursor.fetchone()[0]
+            #     conn.close()
+            #     if int(uid) == 3:
+            #         print("[*] Done!")
+            #         return
         except:
             print("[*] Waiting for database ...", flush=True)
             time.sleep(10)
@@ -130,15 +144,16 @@ def process_login_request(username, password):
     cursor = None
     try:
         # Connect to the Database
-        conn = pymysql.connect(db_host, db_user, db_passwd, db_database, charset='utf8mb4')
-        cursor = conn.cursor()
+        # conn = pymysql.connect(db_host, db_user, db_passwd, db_database, charset='utf8mb4')
+        # cursor = conn.cursor()
         hash_object = hashlib.md5(password.encode())
         cur_hash = hash_object.hexdigest()
         # Retrieve user data (uid, password_hash)
-        query = '''SELECT userID, pass_hash FROM accounts WHERE username = (%s)'''
-        data = (username,)
-        cursor.execute(query, data)
-        for (userID, password_hash) in cursor:
+        query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{username}'"
+        result = query_database(query, True)
+        print(f"[!] result: {result}", flush=True)
+        # cursor.execute(query, data)
+        for (userID, password_hash) in result:
             # validate password hash
             if password_hash == cur_hash:
                 session['username'] = username
@@ -200,7 +215,9 @@ def allowed_files(filename):
 #             sql = "SELECT `id`, `password` FROM `users` WHERE `email`=%s"
 #             cursor.execute(sql, ('webmaster@python.org',))
 #             result = cursor.fetchone()
-#             print(resultFone)
+#             print(resultFone)        # conn = pymysql.connect(db_host, db_user, db_passwd, db_database, charset='utf8mb4')
+        # cursor = conn.cursor()
+
 #     finally:
 #         conn.close()
 
@@ -235,14 +252,17 @@ def download_form_url(url, title, filename):
         return None
     try:
         # add video metadata to the database
-        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-        cursor = conn.cursor()
+        # conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+        # cursor = conn.cursor()
         userID = session['uid']
         query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
-        cursor.execute(query)
-        cursor.close()
-        conn.commit()
-        conn.close()
+
+        query_database(query)
+        # cursor.execute(query)
+        # cursor.close()
+        # conn.commit()
+        # conn.close()
+
         return filename
 
     except Exception as e:
@@ -273,14 +293,17 @@ def process_file_upload():
     if fp and allowed_files(fp.filename):
         try:
             # add video metadata to the database
-            conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-            cursor = conn.cursor()
+            # conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+            # cursor = conn.cursor()
             userID = session['uid']
             query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
-            cursor.execute(query)
-            cursor.close()
-            conn.commit()
-            conn.close()
+
+            query_database(query)
+            # cursor.execute(query)
+            # cursor.close()
+            # conn.commit()
+            # conn.close()
+
             # save the video
             fp.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return filename
