@@ -15,6 +15,10 @@
 					<button class="RTB">RETURN TO BROWSE</button>
 				</form>
 				
+				<form action="/delete/{{video.vidID}}" method="post">
+					<button class="DLT" type="submit">DELETE</button>
+            			</form>
+				
 				<form action="/logout" method="post">
 					<button class="LGOUT">LOG OUT</button>
 				</form>
@@ -39,6 +43,19 @@
 				</ul>
 				
 			</div>
+			<form>
+				<fieldset>
+					{% with messages = get_flashed_messages() %}
+						{% if messages %}
+							<ul class=flashes>
+							{% for message in messages %}
+								<li>{{ message }}</li>
+							{% endfor %}
+							</ul>
+						{% endif %}
+					{% endwith %}
+				</fieldset>
+			</form>
 			
 		</div>
 		

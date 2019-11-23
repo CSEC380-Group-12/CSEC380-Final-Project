@@ -37,12 +37,36 @@ class Video:
 	def getPath(self):
 		return "/static/uploads/"+self.filename
 
+	def delete(self):
+		try:
+			uid = session['uid']
+			if self.userID != uid:
+				flash("You don't have permission to delete this video")
+				print("[!] ... userID={userID}, uid={uid}")
+				return False
+			if not file_check(self.filename):
+				flash("Video does not exist", 'error')
+				print(f"[!] Video does not exist", flush=True)
+				return False
+
+		except Exception as e:
+			print(f"[!] Faild fetch file form database\n{e}", flush=True)
+			flash("Faild to delete the video", 'error')
+			return False
+
+		query_database(
+			"DELETE FROM videos WHERE vidID = %s;",
+			valueTuple=(self.vidID))
+		cmd="rm -f {UPLOAD_DIR}/"+self.filename
+		output = subprocess.Popen(
+			[cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
+		return True
+		
+
 def get_video_from_id(vidID):
-	print(vidID, file=sys.stderr)
 	result = query_database(
 		"SELECT userID, videoTitle, filename FROM videos WHERE vidID = %s;",
 		valueTuple=(vidID))
-	print(result, file=sys.stderr)
 	return Video(vidID, result[0], result[1], result[2])
 
 def get_username_from_uid(uid):
@@ -283,27 +307,6 @@ def process_file_upload():
 			return None
 	return None
 
-def delete_video(vidID):
-	try:
-		query = """SELECT userID, fileName from videos where vidID = %s"""
-		value = (vidID)
-		result = query_database(query, valueTuple=value)
-		userID = value[0]
-		filename = value[1]
-		uid = session.get['uid']
-		if userID != uid:
-			flash("You don't have permission to delete this vidoe")
-			print("[!] ... userID={userID}, uid={uid}")
-			return
-		if not file_check(filename):
-			flash("Video does not exist", 'error')
-			print(f"[!] Video does not exist", flush=True)
-	
-
-	except Exception as e:
-		print(f"[!] Faild fetch file form database\n{e}", flush=True)
-		flash("Faild to delete the video", 'error')
-
 
 	
 
@@ -381,7 +384,6 @@ def route_video_player(vidID):
 	if not is_session_logged_in():
 		return redirect('/login')
 
-	print("Getting video "+str(vidID), file=sys.stderr)
 	video = get_video_from_id(vidID)
 
 	return render_template('videoPlayer.html', 
@@ -403,20 +405,12 @@ def upload_file():
 	if is_session_logged_in():
 		filename = process_file_upload()
 		if filename is not None:
-			vid_url = url_for('static', filename=f"uploads/{filename}")
-			flash("Video uploaded successfully")
-			flash("Redirecting to Video..")
-			
-			flash("url for video:")
-			#TODO: change 
-			flash(f"http://0.0.0.0/static/uploads/{filename}")
-			# return redirect(vid_url)
+			return redirect('/')
 		else:
 			flash(u"Video failed to upload", 'error')
-			# return redirect('/uploadFail')
+			return redirect('/upload')
 	else:
 		return redirect('/login')
-	return redirect('/upload')
 
 
 # serving of the uploaded files
@@ -443,10 +437,14 @@ def route_upload_fail():
 		return redirect("/login")
 
 
-@app.route('/delete', methods=['GET', 'POST'])
-def route_delete():
+@app.route('/delete/<vidID>', methods=['GET', 'POST'])
+def route_delete(vidID):
 	if is_session_logged_in():
-		return render_template('delete.html')
+		video = get_video_from_id(vidID)
+		if video.delete():
+			return redirect("/")
+		else:
+			return redirect("/videoPlayer/"+vidID)
 	else:
 		return render_template('login.html')
 
