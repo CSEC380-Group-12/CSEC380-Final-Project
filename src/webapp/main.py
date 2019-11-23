@@ -38,8 +38,9 @@ class Video:
 		return file_check(filename)
 
 def get_username_from_uid(uid):
-	query_database("SELECT username FROM accounts WHERE uid = %i;", (uid));
-	pass
+	result = query_database("SELECT username FROM accounts WHERE userID = %s;",
+		valueTuple=(uid))
+	return result[0]
 
 # a helper function that queries the database and returns the resualt
 def query_database(query, fetchall=False, valueTuple=None):
@@ -490,7 +491,7 @@ def route_UploadCSS():
 
 
 # DEBUG
-print(get_username_from_uid(1), file=sys.stderr)
+print(get_username_from_uid(3), file=sys.stderr)
 
 # vim:tabstop=4
 # vim:shiftwidth=4
