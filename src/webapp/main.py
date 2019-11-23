@@ -54,12 +54,13 @@ def query_database(query, fetchall=False, valueTuple=None):
 				cursor.execute(query)
 			else:
 				cursor.execute(query, valueTuple)
+			conn.commit()
 			if fetchall:
 				result = cursor.fetchall()
 			else:
 				result = cursor.fetchone()
 			return result
-		conn.commit()
+			
 	except Exception as e:
 		print(f"Error: {e}", flush=True)
 	finally:
@@ -77,16 +78,6 @@ def database_checker():
 			if int(uid) == 3:
 				print("[*] Database loaded!")
 				return
-			# conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-			# with conn.cursor() as cursor:
-			#	 query = f"SELECT userID FROM accounts WHERE username = 'brendy';"
-			#	 cursor.execute(query)
-			#	 conn.commit()
-			#	 uid = cursor.fetchone()[0]
-			#	 conn.close()
-			#	 if int(uid) == 3:
-			#		 print("[*] Done!")
-			#		 return
 		except:
 			print("[*] Waiting for database ...", flush=True)
 			time.sleep(10)
@@ -185,45 +176,9 @@ def process_logout_request():
 	flash('You were logged out.')
 	return True
 
-# # creates the user admin:admin
-# def create_test_users():
-#	 # Add a test user
-#	 conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-#	 cursor = conn.cursor()
-#	 testuser1 = 'admin'
-#	 password = 'admin'
-#	 hash_object = hashlib.md5(password.encode())
-#	 test_hash = hash_object.hexdigest()
-
-#	 query = f"SELECT userID, pass_hash FROM accounts WHERE username = '{testuser1}'"
-#	 conn.commit()
-#	 cursor.execute(query)
-#	 cursor.execute(f"INSERT INTO accounts(username, pass_hash) VALUES ('{testuser1}', '{test_hash}')")
-#	 print(f"added test user: {testuser1}")
-#	 cursor.close()
-#	 conn.commit()
-#	 conn.close()
-# ## Create the user admin:admin
-# create_test_users()
-
 # allowed extentions
 def allowed_files(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# TODO: retrive videos
-# def get_videos():
-#	 conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-#	 try:
-#		 with conn.cursor() as cursor:
-#			 # Read a single record
-#			 sql = "SELECT `id`, `password` FROM `users` WHERE `email`=%s"
-#			 cursor.execute(sql, ('webmaster@python.org',))
-#			 result = cursor.fetchone()
-#			 print(resultFone)		# conn = pymysql.connect(db_host, db_user, db_passwd, db_database, charset='utf8mb4')
-		# cursor = conn.cursor()
-
-#	 finally:
-#		 conn.close()
 
 # check if a file exists (TODO: not used yet)
 def file_check(filename):
@@ -262,10 +217,6 @@ def download_form_url(url, title, filename):
 		query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
 
 		query_database(query)
-		# cursor.execute(query)
-		# cursor.close()
-		# conn.commit()
-		# conn.close()
 
 		return filename
 
@@ -296,18 +247,9 @@ def process_file_upload():
 	filename = secure_filename(fp.filename)  # generate a secure name
 	if fp and allowed_files(fp.filename):
 		try:
-			# add video metadata to the database
-			# conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
-			# cursor = conn.cursor()
 			userID = session['uid']
 			query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
-
 			query_database(query)
-			# cursor.execute(query)
-			# cursor.close()
-			# conn.commit()
-			# conn.close()
-
 			# save the video
 			fp.save(os.path.join(app.config['UPLOAD_DIR'], filename))
 			return filename
@@ -327,11 +269,6 @@ def route_index():
         query = "SELECT * FROM accounts"
         videos = query_database(query, fetchall=True)
         final_list = [videos]
-        #if videos is not None:
-            #for i in videos:     #Splits up the requested data into individual components
-                #final_list.append(str(i[0]))
-                #final_list.append(str(i[1]))
-                #final_list.append(str(i[2]))
         example = ["Jinja works!", str(len(videos))]
         return render_template('home.html', my_list=final_list, test_list=example)
     else:
