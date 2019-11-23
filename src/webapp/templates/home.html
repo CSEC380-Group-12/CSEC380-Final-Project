@@ -27,7 +27,18 @@
             </form>
         </div>
 		
-        <div id="remainder">Content</div>
+        <div class="formBox">
+
+
+		{% for item in test_list %}
+		<li>{{item}}</li>
+		{% endfor %}
+
+		{% for item in my_list %}
+		<li>{{item}}</li>
+		{% endfor %}
+
+	</div>
     </div>
 
 <body>

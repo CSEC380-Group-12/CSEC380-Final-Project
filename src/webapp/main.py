@@ -20,6 +20,27 @@ from threading import Thread
 import urllib.parse as urlparse
 import requests
 
+# A class to represent a Video
+class Video:
+	vidID = int()
+	userID = int()
+	videoTitle = str()
+	filename = str()
+
+	def __init__(self, vidID, userID, videoTitle, filename):
+		self.vidID = vidID
+		self.userID = userID
+		self.videoTitle = videoTitle
+		self.filename = filename
+
+	# Returns the path for this video
+	def getPath():
+		return file_check(filename)
+
+def get_username_from_id(uid):
+	# TODO
+	pass
+
 # a helper function that queries the database and returns the resualt
 def query_database(query, fetchall=False):
     # print(f"query: {query}")
@@ -235,11 +256,13 @@ def download_form_url(url, title, filename):
         # cursor = conn.cursor()
         userID = session['uid']
         query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+
         query_database(query)
         # cursor.execute(query)
         # cursor.close()
         # conn.commit()
         # conn.close()
+
         return filename
 
     except Exception as e:
@@ -274,11 +297,13 @@ def process_file_upload():
             # cursor = conn.cursor()
             userID = session['uid']
             query = f"INSERT INTO videos(userID, videoTitle, fileName) VALUES ('{userID}', '{title}', '{filename}')"
+
             query_database(query)
             # cursor.execute(query)
             # cursor.close()
             # conn.commit()
             # conn.close()
+
             # save the video
             fp.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return filename
@@ -295,7 +320,24 @@ def delete_video(filename):
 @app.route('/')
 def route_index():  
     if is_session_logged_in():
-        return render_template('home.html')
+        conn = pymysql.connect(db_host, db_user, db_passwd, db_database)
+        video_list = []
+        try:
+            with conn.cursor() as cursor:
+                query = "SELECT videoURL, videoTitle FROM videos"
+                cursor.execute(query)
+                video_list = cursor.fetchall()
+                cursor.close()
+        except Exception as e:
+            print(e, flush=True)
+        finally:
+            conn.close()
+        final_list = []
+        for i in video_list:  #Splits up the requested data into individual components
+            final_list.append(str(i[0]))
+            final_list.append(str(i[1]))
+        example = ["Jinja works!"]
+        return render_template('home.html', my_list=final_list, test_list=example)
     else:
         return render_template('login.html')
 
