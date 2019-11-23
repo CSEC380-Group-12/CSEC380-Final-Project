@@ -41,7 +41,7 @@ class Video:
 		try:
 			uid = session['uid']
 			if self.userID != uid:
-				flash("You don't have permission to delete this vidoe")
+				flash("You don't have permission to delete this video")
 				print("[!] ... userID={userID}, uid={uid}")
 				return False
 			if not file_check(self.filename):
@@ -408,20 +408,12 @@ def upload_file():
 	if is_session_logged_in():
 		filename = process_file_upload()
 		if filename is not None:
-			vid_url = url_for('static', filename=f"uploads/{filename}")
-			flash("Video uploaded successfully")
-			flash("Redirecting to Video..")
-			
-			flash("url for video:")
-			#TODO: change 
-			flash(f"http://0.0.0.0/static/uploads/{filename}")
-			# return redirect(vid_url)
+			return redirect('/')
 		else:
 			flash(u"Video failed to upload", 'error')
-			# return redirect('/uploadFail')
+			return redirect('/upload')
 	else:
 		return redirect('/login')
-	return redirect('/upload')
 
 
 # serving of the uploaded files

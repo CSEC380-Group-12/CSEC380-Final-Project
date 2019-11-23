@@ -15,8 +15,8 @@
 					<button class="RTB">RETURN TO BROWSE</button>
 				</form>
 				
-				<form action="/delete" method="post">
-					<button class="DLT" type="submit" value={{video.vidID}}>DELETE</button>
+				<form action="/delete/{{video.vidID}}" method="post">
+					<button class="DLT" type="submit">DELETE</button>
             			</form>
 				
 				<form action="/logout" method="post">
