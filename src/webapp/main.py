@@ -321,13 +321,12 @@ def delete_video(filename):
 def route_index():  
     if is_session_logged_in():
         query = "SELECT * FROM accounts"
-        videos = query_database(query)
+        videos = query_database(query, fetchall=True)
         final_list = [videos]
-        #if videos is not None:
-            #for i in videos:     #Splits up the requested data into individual components
-                #final_list.append(str(i[0]))
-                #final_list.append(str(i[1]))
-                #final_list.append(str(i[2]))
+        #for i in videos:     #Splits up the requested data into individual components
+            #final_list.append(str(i[0]))
+            #final_list.append(str(i[1]))
+            #final_list.append(str(i[2]))
         example = ["Jinja works!", str(len(videos))]
         return render_template('home.html', my_list=final_list, test_list=example)
     else:
