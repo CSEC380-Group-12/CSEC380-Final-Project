@@ -79,8 +79,10 @@ The method that is called when deleting a video checks the userID of the current
 
 # Activity 5
 ## How would you fix your code so that these issues were no longer present?
+We would change it to use prepared statements (like we did throughout the rest of the code) instead of concatenating the username with the SQL statement.
 
 ## What are the limitations, if any that, of the SQL Injection issues you’ve included? 
+Since PyMySQL does not allow for multiple statements in a single `execute()` call, this vulnerability is limited to allowing for manipulation of the existing `SELECT` statement; we can not execute any data manipulation statements or other queries.
 
 # Activity 6
 ## How would you fix your code so that this issue is no longer present?
