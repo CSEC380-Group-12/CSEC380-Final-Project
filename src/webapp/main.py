@@ -183,9 +183,8 @@ def process_login_request(username, password):
 		hash_object = hashlib.md5(password.encode())
 		cur_hash = hash_object.hexdigest()
 		# Retrieve user data (uid, password_hash)
-		query = """SELECT userID, pass_hash FROM accounts WHERE username = %s"""
-		value = (username)
-		result = query_database(query, valueTuple=value)
+		query = "SELECT userID, pass_hash FROM accounts WHERE username = '"+username+"'"
+		result = query_database(query)
 		print(f"[!] result: {result}", flush=True)
 		# cursor.execute(query, data)
 		userID = result[0]
@@ -317,8 +316,10 @@ def route_index():
 		final_list = []
 		for video in videos:
 			final_list.append(video.videoTitle)
-		example = ["Jinja works!", str(len(videos))]
-		return render_template('home.html', video_list=videos)
+		username = get_username_from_uid(session['uid'])
+		return render_template('home.html',
+			video_list=videos,
+			username=username)
 	else:
 		return render_template('login.html')
 
