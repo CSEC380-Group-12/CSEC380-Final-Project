@@ -160,7 +160,7 @@ UPLOAD_DIR = f'/webapp/static/uploads'
 cmd=f"mkdir -p {UPLOAD_DIR}"
 output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
 
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv', 'm4v'}
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv', 'm4v', 'webm'}
 app.config['UPLOAD_DIR'] = UPLOAD_DIR
 # file upload limit = 200mb
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
