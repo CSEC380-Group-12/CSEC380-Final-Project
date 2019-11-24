@@ -89,6 +89,11 @@ The method that is called when deleting a video checks the userID of the current
 
 # Activity 7
 ## How would you fix your code so that this issue is no longer present?
+When uploading files, we specifically stopped sanitizing the input so that it's just the filename put in by the user, but instead we could replace the filename generation with:
+
+filename = secure_filename(fp.filename)
+
+From earlier, more secuer versions of this code.
 
 vim:syn=markdown
 
