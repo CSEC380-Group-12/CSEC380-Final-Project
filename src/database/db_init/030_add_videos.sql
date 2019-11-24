@@ -1,0 +1,2 @@
+INSERT INTO `videos` VALUES (1,3,'Blind SQL Injection','CSEC_462_Cucumber_Linux_1.1_x86_64-2019-11-24T03-39-01-145974000Z.webm',NULL,'2019-11-24 03:42:56');
+

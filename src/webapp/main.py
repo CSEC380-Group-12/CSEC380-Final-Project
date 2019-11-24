@@ -75,10 +75,16 @@ def get_username_from_uid(uid):
  	return result[0]
 
 # Returns a list of video objects for all the videos in the database
-def get_all_videos():
-	results = query_database(
-		"SELECT vidID, userID, videoTitle, filename FROM videos;",
-		fetchall=True)
+def get_all_videos(videoTitle=None):
+	results = None
+	if videoTitle == None:
+		results = query_database(
+			"SELECT vidID, userID, videoTitle, filename FROM videos;",
+			fetchall=True)
+	else:
+		results = query_database(
+			"SELECT vidID, userID, videoTitle, filename FROM videos WHERE videoTitle LIKE '%"+videoTitle+"%';",
+			fetchall=True)
 	videos = []
 	for result in results:
 		videos.append(Video(result[0], result[1], result[2], result[3]))
@@ -160,7 +166,7 @@ UPLOAD_DIR = f'/webapp/static/uploads'
 cmd=f"mkdir -p {UPLOAD_DIR}"
 output = subprocess.Popen([cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
 
-ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv', 'm4v'}
+ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'flv', 'wmv', 'm4v', 'webm'}
 app.config['UPLOAD_DIR'] = UPLOAD_DIR
 # file upload limit = 200mb
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
@@ -183,9 +189,8 @@ def process_login_request(username, password):
 		hash_object = hashlib.md5(password.encode())
 		cur_hash = hash_object.hexdigest()
 		# Retrieve user data (uid, password_hash)
-		query = """SELECT userID, pass_hash FROM accounts WHERE username = %s"""
-		value = (username)
-		result = query_database(query, valueTuple=value)
+		query = "SELECT userID, pass_hash FROM accounts WHERE username = '"+username+"'"
+		result = query_database(query)
 		print(f"[!] result: {result}", flush=True)
 		# cursor.execute(query, data)
 		userID = result[0]
@@ -288,7 +293,8 @@ def process_file_upload():
 	if fp.filename == '' or title == '':
 			print(f'no file name\nfp.fileName{fp.filename}, title: {title}', flush=True)
 			return None
-	filename = secure_filename(fp.filename)  # generate a secure name
+	# Don't generate a secure name (Bader this is deliberate)
+	filename = fp.filename
 	if fp and allowed_files(fp.filename):
 		try:
 			userID = session['uid']
@@ -317,11 +323,24 @@ def route_index():
 		final_list = []
 		for video in videos:
 			final_list.append(video.videoTitle)
-		example = ["Jinja works!", str(len(videos))]
-		return render_template('home.html', video_list=videos)
+		username = get_username_from_uid(session['uid'])
+		return render_template('home.html',
+			video_list=videos,
+			username=username)
 	else:
 		return render_template('login.html')
 
+@app.route('/search', methods=['GET'])
+def route_search():  
+	if not is_session_logged_in():
+		return redirect('/login')
+
+	name = request.args.get('q')
+	videos = get_all_videos(name)
+	username = get_username_from_uid(session['uid'])
+	return render_template('home.html',
+		video_list=videos,
+		username=username)
 
 
 @app.route('/returnToBrowse', methods=['GET', 'POST'])
