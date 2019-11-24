@@ -75,10 +75,18 @@ def get_username_from_uid(uid):
  	return result[0]
 
 # Returns a list of video objects for all the videos in the database
-def get_all_videos():
-	results = query_database(
-		"SELECT vidID, userID, videoTitle, filename FROM videos;",
-		fetchall=True)
+def get_all_videos(videoTitle=None):
+	#"SELECT vidID, userID, videoTitle, filename FROM videos UNION SELECT username, userID, pass_hash, username FROM accounts;",
+	results = None
+	if videoTitle == None:
+		results = query_database(
+			"SELECT vidID, userID, videoTitle, filename FROM videos;",
+			fetchall=True)
+	else:
+		print("SELECT vidID, userID, videoTitle, filename FROM videos WHERE videoTitle = '"+videoTitle+"';", file=sys.stderr)
+		results = query_database(
+			"SELECT vidID, userID, videoTitle, filename FROM videos WHERE videoTitle LIKE '%"+videoTitle+"%';",
+			fetchall=True)
 	videos = []
 	for result in results:
 		videos.append(Video(result[0], result[1], result[2], result[3]))
@@ -323,6 +331,17 @@ def route_index():
 	else:
 		return render_template('login.html')
 
+@app.route('/search', methods=['GET'])
+def route_search():  
+	if not is_session_logged_in():
+		return redirect('/login')
+
+	name = request.args.get('q')
+	videos = get_all_videos(name)
+	username = get_username_from_uid(session['uid'])
+	return render_template('home.html',
+		video_list=videos,
+		username=username)
 
 
 @app.route('/returnToBrowse', methods=['GET', 'POST'])
