@@ -38,14 +38,16 @@ https://github.com/CSEC380-Group-12/CSEC380-Final-Project/blob/master/testing/ac
 https://github.com/CSEC380-Group-12/CSEC380-Final-Project/blob/master/testing/test_act3Login.py
 
 ## How do you ensure that users that navigate to the protected pages cannot bypass authentication requirements?
-For each user that successfully authenticates, we create a Flask session. When a user attempts to connect to the protected pages, we check the Flask session to ensure that the user has authenticated.
+For each user that successfully authenticates, we create a Flask session. When a user attempts to connect to the protected pages, we check the Flask session to ensure that the user has authenticated. If the user has not authenticated, he is redirected to the login page.
 
 ## How do you protect against session fixation?
-We use Flask session cookies, which are only sent when a user correctly authenticates and is lost instantly when the user is no longer authenticated.
+We use Flask session cookies, which are only sent when a user correctly authenticates and is removed instantly when the user is no longer authenticated.
 
 From our code:
+```python
 flask session init
 app.secret_key = secrets.token_bytes(64)
+```
 
 ![Burp](https://user-images.githubusercontent.com/29110777/69473685-13aae600-0d85-11ea-8d7b-804a06e465f6.png)
 
@@ -57,24 +59,26 @@ There is a login attempt limiter, preventing brute force attacks:
 
 From our code:
 
+```python
 rate limit for password brute force
 limiter = Limiter(
 	app,
 	key_func=get_remote_address,
 	default_limits=["1000 per day", "60 per hour", "5 per minute"]
 )
+```
 
 ## How do you prevent username enumeration?
 When you have a failed login attempt, the generated error message does not differentiate between an incorrect username, password, or both being incorrect.
 
 ## What happens if your sessionID is predictable, how do you prevent that?
-The sessionID is an extremely convoluted randomly generated string, making it exceedingly difficult to predict and be taken advantage of by an attacker to gain unauthorized access.
+The sessionID is an extremely convoluted randomly generated string, making it exceedingly difficult to predict and be taken advantage of by an attacker to gain unauthorized access. If it were predictable, it would be possible for an attacker to hijack users' sessions.
 
 # Activity 4
 ## How do you prevent XSS is this step when displaying the username of the user who uploaded the video?
-We sanitize all inputs to the database to ensure that nothing malicious can be entered, intentionally or unintentionally.
+We sanitize almost all inputs to the database to ensure that nothing malicious can be entered, intentionally or unintentionally.
 
-## How do you ensure that users can’t delete videos that aren’t their own?
+## How do you ensure that users can’t delete videos that aren’t his own?
 The method that is called when deleting a video checks the userID of the currently logged in user and the userID of the video uploader, and if they do not match, you cannot delete the video.
 
 # Activity 5
@@ -82,7 +86,7 @@ The method that is called when deleting a video checks the userID of the current
 We would change it to use prepared statements (like we did throughout the rest of the code) instead of concatenating the username with the SQL statement.
 
 ## What are the limitations, if any that, of the SQL Injection issues you’ve included? 
-Since PyMySQL does not allow for multiple statements in a single `execute()` call, this vulnerability is limited to allowing for manipulation of the existing `SELECT` statement; we can not execute any data manipulation statements or other queries.
+Since PyMySQL does not allow for multiple statements in a single `execute()` call, this vulnerability is limited to allowing for manipulation of the existing `SELECT` statement; we can not execute any data manipulation statements; however, we can execute other SELECT queries and the like via UNION attacks.
 
 # Activity 6
 ## How would you fix your code so that this issue is no longer present?
@@ -93,9 +97,11 @@ Since PyMySQL does not allow for multiple statements in a single `execute()` cal
 ## How would you fix your code so that this issue is no longer present?
 When uploading files, we specifically stopped sanitizing the input so that it's just the filename put in by the user, but instead we could replace the filename generation with:
 
+```python
 filename = secure_filename(fp.filename)
+```
 
-From earlier, more secuer versions of this code.
+Specifically, we would revert commit c886402b360c1e0a5ca469c487dc147ba276d068. This is the same way we did it in earlier, more secure versions of this code.
 
 vim:syn=markdown
 
