@@ -293,7 +293,8 @@ def process_file_upload():
 	if fp.filename == '' or title == '':
 			print(f'no file name\nfp.fileName{fp.filename}, title: {title}', flush=True)
 			return None
-	filename = secure_filename(fp.filename)  # generate a secure name
+	# Don't generate a secure name (Bader this is deliberate)
+	filename = fp.filename
 	if fp and allowed_files(fp.filename):
 		try:
 			userID = session['uid']
