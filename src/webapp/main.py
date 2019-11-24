@@ -57,7 +57,7 @@ class Video:
 		query_database(
 			"DELETE FROM videos WHERE vidID = %s;",
 			valueTuple=(self.vidID))
-		cmd="rm -f {UPLOAD_DIR}/"+self.filename
+		cmd=f"rm -f {UPLOAD_DIR}/"+self.filename
 		output = subprocess.Popen(
 			[cmd], shell=True,  stdout = subprocess.PIPE).communicate()[0]
 		return True
