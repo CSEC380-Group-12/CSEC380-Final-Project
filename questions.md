@@ -32,5 +32,15 @@ For testing our project, we chose [pytest testing framework](https://pytest.org/
 - extensive documentation
 - Detailed info on failing assert statements
 
+# Activity 3
+## Classic SQL Injection
+
+## Blind SQL Injection
+### How would you fix your code so that these issues were no longer present?
+We would change it to use prepared statements (like we did throughout the rest of the code) instead of concatenating the username with the SQL statement.
+
+### What are the limitations, if any that, of the SQL Injection issues you’ve included?
+Since PyMySQL does not allow for multiple statements in a single `execute()` call, this vulnerability is limited to allowing for manipulation of the existing `SELECT` statement; we can not execute any data manipulation statements or other queries.
+
 vim:syn=markdown
 
