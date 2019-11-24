@@ -1,0 +1,98 @@
+#container{
+  display:flex;
+  height:100vh;
+}
+
+#quarter{
+  background-color:gainsboro;
+  height:100%;
+  width:250px;
+}
+
+#remainder{
+  background-color:white;
+  height:100%;
+  flex-grow:1;
+}
+
+.RTB {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #0398fc;
+  color: white;
+  font-size: 135%;
+  border-radius: 20px;
+  border:2px grey; 
+  margin: 40px;
+}
+
+.LGOUT {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #2b2929;
+  color: white;
+  font-size: 165%;
+  word-spacing: -8px;
+  border-radius: 20px;
+  border:2px grey; 
+  margin: 40px;
+}
+
+.vid {
+  background-color: black !important; 
+}
+
+.formBox {
+  border:2px solid black; 
+  width:400px; 
+  height: 400px;
+  padding:10px;
+  background: #EAE7E6; 
+  border-radius: 25px;
+  margin: auto;
+  text-align: center;
+}
+
+ul {
+  padding-top: 20px;
+  list-style-type: none;
+}
+
+.vidLabel {
+  font-family: "Lucida Console", Times, serif;
+  font-weight: bold;
+  font-size: 25px;
+}
+
+.DLT {
+  font-family: "Lucida Console", Times, serif;
+  width: 175px;
+  height: 100px;
+  text-align: center;
+  background: #f54747;
+  color: white;
+  font-size: 220%;
+  border-radius: 20px;
+  border:2px grey;
+  margin: 40px;
+}
+
+li {
+  margin: 1em 0;
+}
+
+.deleteFail {
+  font-family: "Lucida Console", Times, serif;
+  color: red;
+  font-weight: bold;
+}
+
+.deleteSuccess {
+  font-family: "Lucida Console", Times, serif;
+  color: blue;
+  font-weight: bold;
+}
