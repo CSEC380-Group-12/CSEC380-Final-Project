@@ -76,14 +76,12 @@ def get_username_from_uid(uid):
 
 # Returns a list of video objects for all the videos in the database
 def get_all_videos(videoTitle=None):
-	#"SELECT vidID, userID, videoTitle, filename FROM videos UNION SELECT username, userID, pass_hash, username FROM accounts;",
 	results = None
 	if videoTitle == None:
 		results = query_database(
 			"SELECT vidID, userID, videoTitle, filename FROM videos;",
 			fetchall=True)
 	else:
-		print("SELECT vidID, userID, videoTitle, filename FROM videos WHERE videoTitle = '"+videoTitle+"';", file=sys.stderr)
 		results = query_database(
 			"SELECT vidID, userID, videoTitle, filename FROM videos WHERE videoTitle LIKE '%"+videoTitle+"%';",
 			fetchall=True)
