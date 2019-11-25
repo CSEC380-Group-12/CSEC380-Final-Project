@@ -40,7 +40,6 @@ def test_video_playback():
     assert r.status_code == 200
 
 def test_video_delete():
-    # TODO fix test for delete: need vid id
     r = s.get(f"{HOST}/delete/1")
     assert r.status_code == 200
     r = s.get(f"{HOST}/static/vidoPlayer/1")
