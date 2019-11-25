@@ -14,7 +14,8 @@ def test_blind_sql():
     r = s.post(f"{HOST}/login", creds)
     print(f"r: {r}, s: {s}", flush=True)
     assert r.status_code == 200
-    assert r.url == f"{HOST}/"
+	login = f"{HOST}/"
+    assert r.url == login
 
 def test_classic_sql():
     sql = "xxx\' UNION SELECT username, userID, pass_hash, username FROM accounts WHERE username != \'"
