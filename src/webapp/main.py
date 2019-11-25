@@ -20,6 +20,7 @@ from threading import Thread
 import urllib.parse as urlparse
 import requests
 
+
 # A class to represent a Video
 class Video:
 	vidID = int()
@@ -233,8 +234,8 @@ def file_check(filename):
 # download a video form a given url
 def download_form_url(url, title, filename):
 	downloaded = False
-	if not allowed_files(filename):
-		return None
+	#if not allowed_files(filename):
+	#	return None
 	
 	r = requests.get(url, stream=True)
 	path = os.path.join(app.config['UPLOAD_DIR'], filename)
@@ -280,7 +281,10 @@ def process_file_upload():
 	parts = urlparse.urlsplit(url)
 	title = request.form.get('vidTitle', '')
 	if parts.scheme in {'http', 'https'}:
-		filename = parts.path.split('/')[-1]
+		try:
+			filename = parts.path.split('/')[-1]
+		except:
+                        filename = url
 		return download_form_url(url, title, filename)
 
 	# check if the post request contains a file
