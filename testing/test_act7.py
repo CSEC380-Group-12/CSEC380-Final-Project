@@ -1,8 +1,9 @@
 #! /usr/bin/python
 
 """
-test_act6Video.py
-SSRF Test
+test_act4Video.py
+a test case where a user authenticates and uploads a new video, accesses their
+video, and then deletes it.
 """
 
 import sys, requests, pytest, json
@@ -28,9 +29,21 @@ def test_valid_login():
     assert r.url == f"{HOST}/"
 
 def test_video_upload():
-    url = "http://google.com"
+    url = "https://secbytes.net/CSEC380/*.mp4"
     data = {'file.URL' : url}
     r = s.post(f"{HOST}/upload", data=data)
     assert r.status_code == 200
 
+def test_video_playback():
+    data = {'vidTitle' : "*"}
+    r = s.get(f"{HOST}/static/uploads/*.mp4", data=data)
+    assert r.status_code == 200
 
+def test_video_delete():
+    r = s.get(f"{HOST}/delete/1")
+    assert r.status_code == 200
+    r = s.get(f"{HOST}/static/vidoPlayer/1")
+    assert r.status_code != 200
+    r = s.get(f"{HOST}/static/uploads/*.mp4")
+    assert "woof.mp4" in r.text
+    # verify if the video is deleted
