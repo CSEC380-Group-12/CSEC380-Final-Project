@@ -78,7 +78,7 @@ The sessionID is an extremely convoluted randomly generated string, making it ex
 ## How do you prevent XSS is this step when displaying the username of the user who uploaded the video?
 We sanitize almost all inputs to the database to ensure that nothing malicious can be entered, intentionally or unintentionally.
 
-## How do you ensure that users can’t delete videos that aren’t his own?
+## How do you ensure that users can’t delete videos that aren’t their own?
 The method that is called when deleting a video checks the userID of the currently logged in user and the userID of the video uploader, and if they do not match, you cannot delete the video.
 
 # Activity 5
@@ -90,8 +90,10 @@ Since PyMySQL does not allow for multiple statements in a single `execute()` cal
 
 # Activity 6
 ## How would you fix your code so that this issue is no longer present?
+We would restrict the formats that the server can download; as it stands, the vulnerability is exploited by allowing the server to make requests to any filetype.
 
 ## How does your test demonstrate SSRF as opposed to just accessing any old endpoint.
+The file that is uploaded requests a URL on our behalf, and we can further verify that this happened by checking the docker container to see that the python reverse shell is there.
 
 # Activity 7
 ## How would you fix your code so that this issue is no longer present?
