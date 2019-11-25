@@ -8,7 +8,7 @@ HOST = "http://127.0.0.1"
 s = requests.session()
 def test_blind_sql():
     username = "brendy\' OR \'1\'=\'1"
-    password = 'flannle'
+    password = 'flask'
     s.auth = (username, password)
     creds = {'username' : username, 'password' : password}
     r = s.post(f"{HOST}/login", creds)
