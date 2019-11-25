@@ -10,3 +10,7 @@
 
 # Username: root
 # Pass: toor
+
+# To start the site, navigate to CSEC380-Final-Project\src, and execute the
+# command: docker-compose up 
+# Afterwards, the site will be visible on localhost:80
