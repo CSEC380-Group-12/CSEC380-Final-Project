@@ -19,5 +19,6 @@ def test_blind_sql():
 def test_classic_sql():
     sql = "xxx\' UNION SELECT username, userID, pass_hash, username FROM accounts WHERE username != \'"
     data = {'' : sql}
-    r = s.post(f"{HOST}/search", data=data)
-    #assert r.status_code == 200
+    r = s.post(f"{HOST}/search", data=data) # portion of hash
+    assert "319c" in r.text
+	
