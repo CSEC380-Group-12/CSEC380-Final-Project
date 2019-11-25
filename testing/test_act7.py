@@ -44,6 +44,6 @@ def test_video_delete():
     assert r.status_code == 200
     r = s.get(f"{HOST}/static/vidoPlayer/1")
     assert r.status_code != 200
-    r = s.get(f"{HOST}/static/uploads/*.mp4")
-    assert "woof.mp4" in r.text
+    r = s.get(f"{HOST}/static/uploads/woff.mp4")
+    assert "woff.mp4" not in r.text
     # verify if the video is deleted
