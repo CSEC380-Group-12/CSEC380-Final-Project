@@ -14,7 +14,7 @@ services:
     networks:
       - csec380
     environment:
-      - FLASK_ENV=production
+      - FLASK_ENV=development
       - APP_NAME=videoTubes
     ports:
       - 80:5000
